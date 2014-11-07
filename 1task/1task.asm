@@ -1,6 +1,6 @@
 dseg segment
 	; определение данных
-	mas dw 1, 12, 13, 14, 88
+	mas dw 0, -20, 13, 14, -88
 	masSize dw 5
 	mes db ', $'
 dseg ends
@@ -20,10 +20,8 @@ start:
 	mov cx, masSize
 cycle:
 	dec cx
-	xor ax,ax
 	mov ax, mas[si]
-	inc si
-	inc si
+	add si, 2
 	call OutInt
 	mov dx, offset mes
 	mov ah,09h
