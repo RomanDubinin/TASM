@@ -3,7 +3,10 @@ OutInt proc
         push bx
         push cx
         push dx
+        push bp
+        mov bp, sp ; bp - мой указатель на стек
 
+        mov ax, [bp+12]
 ; Проверяем число на знак.
         test ax, ax
         jns outAbs
@@ -51,6 +54,7 @@ outModulo:
 
 exit:
 ;Выходим.
+        pop bp
         pop dx
         pop cx
         pop bx
