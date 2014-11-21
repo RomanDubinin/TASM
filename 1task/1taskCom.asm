@@ -1,21 +1,17 @@
-dseg segment
-    ; определение данных
+cseg segment use16
+assume CS:cseg, DS:cseg
+Org 100h
+    
+entry:
+    jmp start
+
     mas dw 403, -20, -5139, 134, -88
     masSize dw 5
     mes db ' ,$'
-dseg ends
 
-sseg segment stack
-    n dw 256 dup (?)
-sseg ends
+include OutInt.inc
 
-cseg segment
-
-    assume ds: dseg, cs: cseg, ss: sseg
-    include OutInt.inc
-start: 
-    mov ax, dseg
-    mov ds, ax
+start:
     mov si, 0
     mov cx, masSize
     push mas[si]
@@ -41,4 +37,4 @@ endprog:
     mov ah,04Ch
     int 21h
 cseg ends
-end start
+end entry
