@@ -1,7 +1,7 @@
 dseg segment
-	num dw 5
+	num dw 6
 	res dw 0
-	mes db '! == $'
+	mes db '! = $'
 dseg ends
 
 sseg segment stack
@@ -23,6 +23,12 @@ start:
 	
 	pop ax
 	pop ax
+	
+	push num
+	call OutInt
+	mov dx, offset mes
+	mov ah, 09h
+	int 21h
 	push res
 	call OutInt
 	pop res
