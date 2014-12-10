@@ -1,6 +1,6 @@
 victim proc
 	mov ah, 9h
-    lea dx, test_s
+	lea dx, testMes
 	int 21h
 	
 	mov ah, 2h

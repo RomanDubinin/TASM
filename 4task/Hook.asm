@@ -1,4 +1,3 @@
-; запомнить старый обработчик, запилить свой, показать, восстановить старый
 .386
 assume CS:cseg, DS:dseg, SS:sseg
 
@@ -7,8 +6,8 @@ sseg segment stack use16
 sseg ends
 
 dseg segment use16
-	test_s db 'tsm msg$'
-	hack_s db 'you are trapped$'
+	testMes db 'tsm msg$'
+	hookMes db 'you are trapped$'
 dseg ends
 
 cseg segment use16
@@ -17,40 +16,40 @@ include victim.inc
 defaultHandler dd ?
 
 replace proc
+	cli
 	mov ah, 25h   ; save
 	mov al, 21h
 	mov dx, seg myHook
 	mov ds, dx
 	mov dx, offset myHook
 	int 21h
+	sti
 	
 	ret
 replace endp
 
 conversely proc
+	cli
 	lds dx, defaultHandler ; defaultHandler -> dx; defaultHandler+2 -> ds
 	mov ah, 25h         ; save
 	mov al, 21h
 	int 21h
-	
+	sti
+
 	ret
 conversely endp
 
 myHook proc
 	cmp ah, 9h
 	jnz original
-	
-	;push dx
-	lea dx, hack_s
-	;jmp ds:dword ptr defaultHandler
-	;pop dx
-	
+
+	lea dx, hookMes
+
 	original:
 	jmp cs:dword ptr defaultHandler
 myHook endp
 
 main:
-	; backup old handler of 21h
 	mov ah, 35h   ; load
 	mov al, 21h
 	int 21h
