@@ -1,13 +1,13 @@
 @echo off
-tasm /zi  /l /c /m2 %1
+tasm /zi  /l /c /m2 %1.asm
 if errorlevel 1 goto ert
-tlink /v /m /i /l /s /n %1 
+tlink /v /m /i /l /s /n %1.obj
 if errorlevel 1 goto erl
-echo *********** Нормально !!!!!! *************
+echo *********** 1 *************
 goto end
 :ert
-echo *********** Транслятор обнаружил ошибки !!!! **************
+echo *********** 2 **************
 goto end
 :erl
-echo *********** Редактор связей обнаружил ошибки !!!! **************
+echo *********** 3 **************
 :end
