@@ -1,14 +1,14 @@
-
-dseg segment
-	mas dw -1, -6, -3, 0, 2, 3, 5, 10
-	masSize dw 8
+.386
+dseg segment use16
+	mas dw -10, -6, -5, 0, 3, 10
+	masSize dw 6
 dseg ends
 
-sseg segment stack
+sseg segment stack  use16
 	n dw 256 dup (?)
 sseg ends
 
-cseg segment
+cseg segment  use16
 
 	assume ds: dseg, cs: cseg, ss: sseg
 
@@ -17,10 +17,11 @@ start:
 	mov ds, ax
 	mov si, 0
 	mov cx, masSize
+	
+	push 1
+	mov bp, sp
 
 cycle:
-	jcxz endprog
-
 	cmp mas[si], -5
 	jl section1
 	cmp mas[si], 3
@@ -28,20 +29,64 @@ cycle:
 	jmp section3
 	
 	section1:
+		mov dword ptr [bp], -2
+		fild dword ptr [bp]
 		fild mas[si]
 		
-		jmp endCycle
-	section2:
+		fmul st(1), st(0)
+		fstp dword ptr [bp]
 		
-		jmp endCycle
+		mov dword ptr [bp], -14
+		fild dword ptr [bp]
+		fadd st(1), st(0)
+		fstp dword ptr [bp]
+		
+		jmp endIteration
+	section2:
+		mov dword ptr [bp], 3
+		fild dword ptr [bp]
+		mov dword ptr [bp], 4
+		fild dword ptr [bp]
+		fdiv st(1), st(0); 3/4
+		fstp dword ptr [bp]
+		
+		fild mas[si]
+		fmul st(1), st(0)
+		fstp dword ptr [bp]
+		;x coef
+		
+		mov dword ptr [bp], -1
+		fild dword ptr [bp]
+		mov dword ptr [bp], 4
+		fild dword ptr [bp]
+		fdiv st(1), st(0); 1/4
+		fstp dword ptr [bp]
+		
+		fadd st(1), st(0)
+		fstp dword ptr [bp]
+		
+		jmp endIteration
 		
 	section3:
+		mov dword ptr [bp], 14
+		fild dword ptr [bp]
+		fild mas[si]
 		
-		jmp endCycle
+		fmul st(1), st(0)
+		fstp dword ptr [bp]
 		
-	endCycle:
+		mov dword ptr [bp], -40
+		fild dword ptr [bp]
+		fadd st(1), st(0)
+		fstp dword ptr [bp]
+		
+		jmp endIteration
+		
+	endIteration:
+		fstp dword ptr [bp]
 		add si, 2
 		dec cx
+		jcxz endprog
 		jmp cycle
 	
 endprog:
