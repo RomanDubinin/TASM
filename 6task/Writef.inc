@@ -10,10 +10,8 @@ Writef proc
     
     mov ah, 40h ;write
     mov bx, hFile
-    mov dx, [bp+20]
-	mov di, dx
-	add di, -2
-	mov cx, [di]
+    mov dx, [bp+22]
+	mov cx, [bp+20]
     int 21h
 	
    
