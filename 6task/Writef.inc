@@ -9,6 +9,11 @@ Writef proc
 	mov bx, ax ; descriptor
 	
 	mov ah, 40h ;write
+	mov dx, [bp+26]
+	mov cx, [bp+24]
+	int 21h
+	
+	mov ah, 40h ;write
 	mov dx, [bp+22]
 	mov cx, [bp+20]
 	int 21h

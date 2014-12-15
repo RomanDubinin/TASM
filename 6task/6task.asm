@@ -1,15 +1,20 @@
 ﻿.386
 dseg segment use16
-	maxKeyLen  db 128
-	keyLen db 0
-	key db 16 dup('?')
+	maxKey1Len  db 128
+	key1Len db 0
+	key1 db 16 dup('?')
+	
+	maxKey2Len  db 128
+	key2Len db 0
+	key2 db 16 dup('?')
 	
 	;fin db 33 dup(0)
 	fin db "in.txt", 0h
 	fout db "out.txt", 0h
 	
-	bufLen dw ?
-	buf db 65 dup(0)
+	buf1Len dw ?
+	buf1 db 65 dup(0)
+	
 dseg ends
 
 sseg segment stack  use16
@@ -27,23 +32,33 @@ start:
 	mov ax, dseg
 	mov ds, ax
 	
-	;push offset key
-	;call ReadCL
+	push offset key1 ; write input file name, plz
+	call ReadCL
 	
-	push offset fin
-	push offset buf
+	push offset key1
+	push offset buf1
 	call Readf
 	pop ax
 	pop ax
 	
-	mov di, offset buf
-	add di, -2
-	mov dx, [di]
+	push offset key1 ; write output file, plz
+	call ReadCL
+	
+	push offset key2 ; write your str, plz
+	call ReadCL
+	
+	mov di, offset key2Len
 	movzx dx, byte ptr [di]
 	
-	push offset buf
-	push dx ; buf size
-	push offset fout
+	push offset key2
+	push dx ; str size
+	
+	mov dx, buf1Len
+	
+	push offset buf1
+	push dx; file len
+	
+	push offset key1
 	call Writef
 	
 

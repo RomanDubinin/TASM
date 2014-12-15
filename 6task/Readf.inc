@@ -8,7 +8,7 @@ Readf proc
 	int 21h    
 	mov bx, ax; hendler
 	
-	mov ah, 3fh
+	mov ah, 3fh ; read
 	mov cx, 64   ; size
 	mov dx, [bp+18]
 	int 21h
