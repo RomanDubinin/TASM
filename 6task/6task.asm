@@ -4,7 +4,6 @@ dseg segment use16
 	keyLen db 0
 	key db 16 dup('?')
 	
-	hFile dw ?
 	;fin db 33 dup(0)
 	fin db "in.txt", 0h
 	fout db "out.txt", 0h
@@ -28,25 +27,26 @@ start:
 	mov ax, dseg
 	mov ds, ax
 	
-	push offset key
-	call ReadCL
+	;push offset key
+	;call ReadCL
 	
-	;push offset fin
-	;push offset buf
-    ;call Readf
-	;pop ax
-	;pop ax
+	push offset fin
+	push offset buf
+	call Readf
+	pop ax
+	pop ax
 	
-	mov di, offset key
-	add di, -1
+	mov di, offset buf
+	add di, -2
+	mov dx, [di]
 	movzx dx, byte ptr [di]
 	
-	push offset key
+	push offset buf
 	push dx ; buf size
 	push offset fout
 	call Writef
 	
-    
+
 	
 	
 endprog:
