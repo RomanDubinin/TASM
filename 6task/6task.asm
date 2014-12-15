@@ -13,8 +13,9 @@ dseg segment use16
 	fout db "out.txt", 0h
 	
 	buf1Len dw ?
-	buf1 db 65 dup(0)
+	buf1 db 60 dup(0)
 	
+	mes db '13$'
 dseg ends
 
 sseg segment stack  use16
@@ -28,13 +29,27 @@ include Readf.inc
 include Writef.inc
 include ReadCL.inc
 
+GoNewLine proc
+	MOV AH, 0EH   ; писать символ на активную видео страницу (эмуляция телетайпа), инициатор - прерывание 10Н    
+	MOV AL, 10   ; перевод строки    
+	INT 10H
+	
+	MOV AH, 0EH   ; писать символ на активную видео страницу (эмуляция телетайпа), инициатор - прерывание 10Н    
+	MOV AL, 13   ; возврат каретки    
+	INT 10H
+	ret
+GoNewLine endp
+
+
 start: 
 	mov ax, dseg
 	mov ds, ax
 	
 	push offset key1 ; write input file name, plz
 	call ReadCL
-	
+	call GoNewLine
+
+		
 	push offset key1
 	push offset buf1
 	call Readf
@@ -43,6 +58,8 @@ start:
 	
 	push offset key1 ; write output file, plz
 	call ReadCL
+	call GoNewLine
+
 	
 	push offset key2 ; write your str, plz
 	call ReadCL
@@ -60,9 +77,6 @@ start:
 	
 	push offset key1
 	call Writef
-	
-
-	
 	
 endprog:
 	mov ah,04Ch
