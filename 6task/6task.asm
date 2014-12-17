@@ -15,6 +15,9 @@ dseg segment use16
 	buf1Len dw ?
 	buf1 db 60 dup(0)
 	
+	buf2Len dw ?
+	buf2 db 60 dup(' ')
+	
 	mes db '13$'
 dseg ends
 
@@ -63,7 +66,21 @@ start:
 	
 	push offset key2 ; write your str, plz
 	call ReadCL
-	
+	;///////////////////////
+	;copy
+	mov cx, buf1Len
+	;lds si, buf1
+	mov ax, seg buf1
+	mov ds, ax
+	mov si, offset buf1
+	;les di, buf2
+	mov ax, seg buf2
+	mov es, ax
+	mov di, offset buf2
+	rep movsb
+	mov ax, dseg
+	mov ds, ax
+	;///////////////////////
 	mov di, offset key2Len
 	movzx dx, byte ptr [di]
 	
@@ -72,7 +89,7 @@ start:
 	
 	mov dx, buf1Len
 	
-	push offset buf1
+	push offset buf2
 	push dx; file len
 	
 	push offset key1

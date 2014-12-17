@@ -2,7 +2,7 @@ Writef proc
 	pusha
 	mov bp, sp
 	
-	mov ah, 3ch ; descriptor
+	mov ah, 3ch 
 	mov dx, [bp+18]
 	mov cx, 0
 	int 21h

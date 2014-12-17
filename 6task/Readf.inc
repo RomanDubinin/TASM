@@ -12,7 +12,7 @@ Readf proc
 	mov cx, 64   ; size
 	mov dx, [bp+18]
 	int 21h
-	add dx, -2
+	add dx, -2 ;real size
 	mov di, dx
 	mov [di], ax
 
