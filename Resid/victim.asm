@@ -6,14 +6,19 @@ Org 100h
 entry:
     jmp start
 
-	mes db ' hi$'
+	endv db ' end$'
+	begin db ' begin $'
 start:
     
-    mov ah, 01h
+	mov ah, 9h
+	mov dx, offset begin
+	int 21h
+	
+    mov ah, 03h
 	int 00h
 	
 	mov ah, 9h
-	mov dx, offset mes
+	mov dx, offset endv
 	int 21h
     
     mov ah,04Ch

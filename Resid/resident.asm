@@ -10,6 +10,11 @@ exit proc
 	jmp dword ptr cs:[defaultVector] 
 exit endp
 
+check proc
+	mov ax, 0
+	iret
+check endp
+
 removeHook proc
 	pusha
 
@@ -43,6 +48,9 @@ interruptHook proc
 	
 	cmp ah, 00h
 	je exit
+	
+	cmp ah, 02h
+	je check
 
 	push ds ; сохраняю ds вызвавшей программы
 	
