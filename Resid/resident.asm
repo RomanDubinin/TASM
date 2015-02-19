@@ -15,7 +15,7 @@ removeHook proc
 
 	mov dx, word ptr cs:[defaultVector]
 	mov ds, word ptr cs:[defaultVector+2]
-	mov ax, 2521h ; 
+	mov ax, 2500h ; 
 	int 21h
 	
 	mov ah, 49h ; освобождаем память 
@@ -26,8 +26,7 @@ removeHook proc
 removeHook endp
 
 interruptHook proc
-	cmp ah, 09h
-	jne exit
+	
 
 	push ds ; сохраняю ds вызвавшей программы
 	
@@ -37,7 +36,8 @@ interruptHook proc
 	pushf
 	mov ah, 9h
 	mov dx, offset mes
-
+	int 21h
+	
 	call dword ptr cs:[defaultVector]  ; Зовем стандартный обработчик
 
 	call removeHook ; Восстанавливаем стандартный обработчик
@@ -51,13 +51,13 @@ mes db 'hook$'
 interruptHook endp
 
 main:
-	mov	ax,3521h
+	mov	ax,3500h
 	int	21h
 	
 	mov	word ptr defaultVector, bx 
 	mov	word ptr defaultVector+2, es
 	cli
-	mov	ax,2521h 
+	mov	ax,2500h 
 	mov	dx,offset interruptHook
 	int	21h
 	sti

@@ -11,7 +11,7 @@ start:
     
     mov ah, 9h
 	lea dx, mes
-	int 21h
+	int 00h
     
     mov ah,04Ch
     int 21h
