@@ -13,20 +13,36 @@ exit endp
 removeHook proc
 	pusha
 
+	push ds ; сохраняю ds вызвавшей программы
+	
+	push cs
+	
 	mov dx, word ptr cs:[defaultVector]
 	mov ds, word ptr cs:[defaultVector+2]
 	mov ax, 2500h ; 
 	int 21h
 	
+	pop ds ; в ds кладу сегмент, в котором лежит моё прерывание
+	
+	mov ah, 9h
+	mov dx, offset delMes
+	int 21h
+	
 	mov ah, 49h ; освобождаем память 
     int 21h
 
+	pop ds;восстановил ds вызывающей программы
+	
 	popa
-	ret
+	iret
 removeHook endp
 
 interruptHook proc
+	cmp ah, 01h
+	je removeHook
 	
+	cmp ah, 00h
+	je exit
 
 	push ds ; сохраняю ds вызвавшей программы
 	
@@ -40,14 +56,13 @@ interruptHook proc
 	
 	call dword ptr cs:[defaultVector]  ; Зовем стандартный обработчик
 
-	call removeHook ; Восстанавливаем стандартный обработчик
-
-	pop ds
+	pop ds;восстановил ds вызывающей программы
 	
-	iret
+	iret ; восстановит cs
 
 defaultVector	dd ?
 mes db 'hook$'
+delMes db 'hook deleted$'
 interruptHook endp
 
 main:
