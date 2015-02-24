@@ -140,6 +140,8 @@ residentEnd:
 delMes db 'hookDeleted$'
 helpMes db 'help$'
 cannotUninstall db 'cannot uninstall resident$'
+cannotKill db 'cannot kill$'
+killMes db 'hookKilled$'
 
 help proc
 	pusha
@@ -215,6 +217,30 @@ uninstall proc
 uninstall endp
 
 kill proc
+	pusha
+	
+	mov ax, 8882h
+	int 2Fh
+	
+	mov ax, 8883h
+	int 2fh
+	cmp ax, 0
+	jne successKill; 
+	
+	unSuccessKill:; всё плохо
+	mov ah, 9h
+	mov dx, offset cannotKill
+	int 21h
+	jmp endKill
+	
+	successKill:
+	mov ah, 9h
+	mov dx, offset killMes
+	int 21h
+	
+	endKill:
+	popa
+	ret
 
 kill endp
 
@@ -242,7 +268,7 @@ main:
 	jmp exitMain
 	
 	_kill:
-	cmp al, 'u'
+	cmp al, 'k'
 	jnz _unknown
 	call kill
 	jmp exitMain
