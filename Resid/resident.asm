@@ -78,28 +78,38 @@ createHook proc
 createHook endp
 
 hookManager proc
+
+	cmp ah, 88h
+	jne not88
+	
 	push ds ; сохраняю ds вызвавшей программы
 	
 	push cs
 	pop ds ; в ds кладу сегмент, в котором лежит моё прерывание
-
-	cmp ah, 81h
+	
+	cmp al, 81h
 	je createHook
 	endCreateHook:
 
-	cmp ah, 82h
+	cmp al, 82h
 	je removeHook
 	endRemoveHook:
 	
-	cmp ah, 83h
+	cmp al, 83h
 	je checkHook
 	endCheckook:
 	
-	cmp ah, 84h
+	cmp al, 84h
 	je check
 	endCheck:
 	
 	pop ds;восстановил ds вызывающей программы
+	jmp managerExit
+	
+	not88:
+	call dword ptr cs:[default2FVector] 
+	
+	managerExit:
 	iret
 
 hookManager endp

@@ -14,7 +14,8 @@ start:
 	mov dx, offset begin
 	int 21h
 	
-    mov ah, 83h
+    mov ah, 88h
+	mov al, 82h
 	int 00h
 	
 	mov ah, 9h
