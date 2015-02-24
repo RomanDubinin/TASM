@@ -15,7 +15,7 @@ start:
 	int 21h
 	
     mov ah, 88h
-	mov al, 82h
+	mov al, 81h
 	int 00h
 	
 	mov ah, 9h
