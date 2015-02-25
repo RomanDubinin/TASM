@@ -26,6 +26,7 @@ uninstallResident endp
 killResident proc
 	pusha
 	push ds
+	
 	cli
 	lds dx, cs:[default00Vector]
 	mov ax, 2500h ; 
@@ -35,6 +36,9 @@ killResident proc
 	mov ax, 252Fh ; 
 	int 21h
 	sti
+	
+	mov ah, 49h ; освобождаем память 
+    int 21h
 	
 	pop ds
 	popa
@@ -68,11 +72,6 @@ checkHook proc
 	popa
 	ret
 checkHook endp
-
-
-	;mov ah, 49h ; освобождаем память 
-    ;int 21h
-	
 
 
 hookManager proc
@@ -138,7 +137,13 @@ mes db 'hook$'
 residentEnd:
 
 delMes db 'hookDeleted$'
-helpMes db 'help$'
+helpMes db 'help:',10,13
+db 'h - help',10,13
+db 'i - install',10,13
+db 'u - uninstall',10,13
+db 'k - kill$',10,13
+db '$',10,13
+
 cannotUninstall db 'cannot uninstall resident$'
 cannotKill db 'cannot kill$'
 killMes db 'hookKilled$'
