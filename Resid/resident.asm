@@ -26,8 +26,76 @@ printBX proc
 	ret
 printBX endp
 
+printIntVector proc
+	;al - num of interrupt
+	pusha
+	mov	ah,35h
+	int	21h
+	push bx; offset
+	mov bx, es
+	call printBX
+	mov ah, 02h
+	mov dl, ':'
+	int 21h
+	pop bx
+	call printBX
+	popa
+	ret
+printIntVector endp
+
+printNewString proc
+	pusha
+	lea dx, newString
+	mov ah, 09h
+	int 21h
+	popa
+	ret
+printNewString endp
+
+printCurrentSeg proc
+	pusha
+	lea dx, curSegString
+	mov ah, 09h
+	int 21h
+	
+	mov bx, cs
+	call printBX
+	
+	lea dx, newString
+	mov ah, 09h
+	int 21h
+	popa
+	ret
+printCurrentSeg endp
+
+printInfo proc
+	pusha
+	;00h
+	lea dx, int00AdrStr
+	mov ah, 09h
+	int 21h
+	
+	mov al, 00h
+	call printIntVector
+	call printNewString
+	;2fh
+	lea dx, int2FAdrStr
+	mov ah, 09h
+	int 21h
+	
+	mov al, 2Fh
+	call printIntVector
+	call printNewString
+	popa
+	ret
+printInfo endp
+
 uninstallResident proc
 	pusha
+	
+	call printCurrentSeg
+	call printInfo
+	
 	mov ax, 1
 	call checkHook
 	cmp ax, 0
@@ -38,8 +106,11 @@ uninstallResident proc
 	lea dx, uninstallMess
 	mov ah, 09h
 	int 21h
+	call printNewString
 	
 	uninstallFail:
+	call printInfo
+	
 	popa
 	ret
 uninstallResident endp
@@ -48,17 +119,6 @@ uninstallResident endp
 killResident proc
 	pusha
 	push ds
-	
-	lea dx, addr00
-	mov ah, 09h
-	int 21h
-	mov bx, word ptr cs:[default00Vector]
-	call printBX
-	mov dl, ':'
-	mov ah, 02h
-	int 21h
-		mov bx, word ptr cs:[default00Vector+2]
-		call printBX
 	
 	cli
 	lds dx, cs:[default00Vector]
@@ -173,9 +233,12 @@ default00Vector	dd ?
 default2FVector dd ?
 
 mes db 'hook$'
-addr00 db 'int00 adress: $'
-addr2F db 'int2F adress: $'
-uninstallMess db 10,13,'uninstall $'
+installMess db 'install $'
+uninstallMess db 'uninstall $'
+newString db 10, 13, '$'
+int00AdrStr db '00 vector: $'
+int2FAdrStr db '2F vector: $'
+curSegString db 'current segment: $'
 
 residentEnd:
 
