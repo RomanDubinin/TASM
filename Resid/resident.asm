@@ -152,17 +152,30 @@ checkHook proc
 	mov	ax,3500h
 	int	21h
 	
-	
 	push offset interruptHook
 	pop ax
 	
 	cmp ax, bx
 	jne exit
 	
-	push es
+	mov ax, es
+	mov dx, ds
+	
+	cmp dx, ax
+	jne exit
+	
+	
+	mov	ax,352Fh
+	int	21h
+	
+	push offset hookManager
 	pop ax
-	push ds
-	pop dx
+	
+	cmp ax, bx
+	jne exit
+	
+	mov ax, es
+	mov dx, ds
 	
 	cmp dx, ax
 	jne exit
