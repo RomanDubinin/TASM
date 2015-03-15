@@ -94,7 +94,6 @@ uninstallResident proc
 	pusha
 	
 	call printCurrentSeg
-	call printInfo
 	
 	mov ax, 1
 	call checkHook
@@ -106,10 +105,8 @@ uninstallResident proc
 	lea dx, uninstallMess
 	mov ah, 09h
 	int 21h
-	call printNewString
 	
 	uninstallFail:
-	call printInfo
 	
 	popa
 	ret
@@ -118,6 +115,9 @@ uninstallResident endp
 	
 killResident proc
 	pusha
+	
+	call printCurrentSeg
+	
 	push ds
 	
 	cli
@@ -129,6 +129,12 @@ killResident proc
 	mov ax, 252Fh ; 
 	int 21h
 	sti
+	
+	pop ds
+	
+	lea dx, killMes
+	mov ah, 09h
+	int 21h
 	
 	mov ax, cs:[2ch]
 	push ax
@@ -142,7 +148,7 @@ killResident proc
 	mov ah, 49h ; освобождаем память 
     int 21h
 	
-	pop ds
+	
 	popa
 	ret
 killResident endp
@@ -246,8 +252,9 @@ default00Vector	dd ?
 default2FVector dd ?
 
 mes db 'hook$'
-installMess db 'install $'
-uninstallMess db 'uninstall $'
+installMess db 'install', 10, 13, '$'
+uninstallMess db 'uninstall', 10, 13, '$'
+killMes db 'kill', 10, 13, '$'
 newString db 10, 13, '$'
 int00AdrStr db '00 vector: $'
 int2FAdrStr db '2F vector: $'
@@ -265,7 +272,6 @@ db '$',10,13
 
 cannotUninstall db 'cannot uninstall resident$'
 cannotKill db 'cannot kill$'
-killMes db 'hookKilled$'
 
 help proc
 	pusha
@@ -316,8 +322,13 @@ install endp
 uninstall proc
 	pusha
 	
-	mov ax, 8881h
+	call printInfo
+	
+	mov ax, 8881h; uninstall
 	int 2Fh
+	
+	call printInfo
+	call printNewString
 	
 	mov ax, 8883h
 	int 2fh
@@ -341,8 +352,13 @@ uninstall endp
 kill proc
 	pusha
 	
+	call printInfo
+	
 	mov ax, 8882h
 	int 2Fh
+	
+	call printInfo
+	call printNewString
 	
 	mov ax, 8883h
 	int 2fh
