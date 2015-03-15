@@ -2,3 +2,6 @@
 *.map
 *.obj
 /dos
+*.lst
+*.com
+*.bat
