@@ -397,39 +397,20 @@ kill endp
 
 main:
 	
-	mov al, es:[82h]
+	mov cl, 5
 	
-	_help:
-	cmp al, 'h'
-	jnz _install
-	call help
-	jmp exitMain
+	mov al, cs:[82h]
+	lea di, keys
 	
-	_install:
-	cmp al, 'i'
-	jnz _uninstall
-	call install
-	jmp exitMain
+	repne scasb
+	shl cx, 1
+	mov di, cx
+	call lbs[di]
 	
-	_uninstall:
-	cmp al, 'u'
-	jnz _kill
-	call uninstall
-	jmp exitMain
-	
-	_kill:
-	cmp al, 'k'
-	jnz _unknown
-	call kill
-	jmp exitMain
-	
-	_unknown:
-	call help
-	jmp exitMain
-	
-	exitMain:
 	mov ah,04Ch
     int 21h
 	
+	keys db 'uikh'
+	lbs dw help, help, kill, install, uninstall
 cseg ends	
 end ENTRY
