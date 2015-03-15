@@ -98,10 +98,10 @@ hookManager proc
 	cmp al, 83h
 	call checkHook
 	
-	jmp managerExit
+	;jmp managerExit
 	
 	not88:
-	call dword ptr cs:[default2FVector] 
+	jmp dword ptr cs:[default2FVector] 
 	
 	managerExit:
 	pop ds;восстановил ds вызывающей программы
@@ -160,7 +160,7 @@ help endp
 install proc
 	pusha
 	
-	mov ax, 8883h
+	mov ax, 8883h; check
 	int 2fh
 	cmp ax, 0
 	je endInstall
