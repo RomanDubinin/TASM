@@ -271,6 +271,7 @@ db 'k - kill$',10,13
 db '$',10,13
 
 cannotUninstall db 'cannot uninstall resident$'
+cannotInstallMess db 'cannot install resident$'
 cannotKill db 'cannot kill$'
 
 help proc
@@ -284,6 +285,8 @@ help endp
 
 install proc
 	pusha
+	
+	call printInfo
 	
 	mov ax, 8883h; check
 	int 2fh
@@ -310,10 +313,22 @@ install proc
 	int	21h
 	sti
 	
+	lea dx, installMess
+	mov ah, 09h
+	int 21h
+	
+	call printInfo
+	call printNewString
+	
 	mov	dx,offset residentEnd
 	int	27h
 	
 	endInstall:
+	
+	lea dx, cannotInstallMess
+	mov ah, 09h
+	int 21h
+	
 	popa
 	ret
 
@@ -372,9 +387,6 @@ kill proc
 	jmp endKill
 	
 	successKill:
-	mov ah, 9h
-	mov dx, offset killMes
-	int 21h
 	
 	endKill:
 	popa
