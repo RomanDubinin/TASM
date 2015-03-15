@@ -8,6 +8,24 @@ ENTRY:
 	
 	
 ;==================================================================
+printBX proc
+	pusha
+	mov cx, 4 
+@k:
+	rol bx, 4 ; bx = 0001000000010000
+	mov al, bl ; al = 00010000
+	and al, 0fh ; al = 00000000
+	cmp al, 10
+	sbb al, 69h
+	das
+	mov dh, 02h
+	xchg ax, dx
+	int 21h
+	loop @k
+	popa
+	ret
+printBX endp
+
 uninstallResident proc
 	pusha
 	mov ax, 1
@@ -16,6 +34,10 @@ uninstallResident proc
 	jne uninstallFail 
 	
 	call killResident
+	
+	lea dx, uninstallMess
+	mov ah, 09h
+	int 21h
 	
 	uninstallFail:
 	popa
@@ -27,6 +49,17 @@ killResident proc
 	pusha
 	push ds
 	
+	lea dx, addr00
+	mov ah, 09h
+	int 21h
+	mov bx, word ptr cs:[default00Vector]
+	call printBX
+	mov dl, ':'
+	mov ah, 02h
+	int 21h
+		mov bx, word ptr cs:[default00Vector+2]
+		call printBX
+	
 	cli
 	lds dx, cs:[default00Vector]
 	mov ax, 2500h ; 
@@ -37,6 +70,15 @@ killResident proc
 	int 21h
 	sti
 	
+	mov ax, cs:[2ch]
+	push ax
+	pop es
+	mov ah, 49h
+	int 21h
+	
+	push cs
+	pop es
+
 	mov ah, 49h ; освобождаем память 
     int 21h
 	
@@ -111,7 +153,6 @@ hookManager proc
 hookManager endp
 
 interruptHook proc
-
 	push ds ; сохраняю ds вызвавшей программы
 	
 	push cs
@@ -125,18 +166,20 @@ interruptHook proc
 	pop ds;восстановил ds вызывающей программы
 	jmp dword ptr cs:[default00Vector]  ; Зовем стандартный обработчик
 
-	iret ; восстановит cs
-
-
+	iret ; не нужен
 interruptHook endp
 
 default00Vector	dd ?
 default2FVector dd ?
+
 mes db 'hook$'
+addr00 db 'int00 adress: $'
+addr2F db 'int2F adress: $'
+uninstallMess db 10,13,'uninstall $'
 
 residentEnd:
 
-delMes db 'hookDeleted$'
+
 helpMes db 'help:',10,13
 db 'h - help',10,13
 db 'i - install',10,13
@@ -212,9 +255,7 @@ uninstall proc
 	jmp endUninstall
 	
 	successUninstall:
-	mov ah, 9h
-	mov dx, offset delMes
-	int 21h
+	
 	
 	endUninstall:
 	popa
