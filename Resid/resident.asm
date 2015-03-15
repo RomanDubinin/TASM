@@ -101,6 +101,7 @@ hookManager proc
 	;jmp managerExit
 	
 	not88:
+	pop ds;восстановил ds вызывающей программы
 	jmp dword ptr cs:[default2FVector] 
 	
 	managerExit:
@@ -116,15 +117,14 @@ interruptHook proc
 	push cs
 	pop ds ; в ds кладу сегмент, в котором лежит моё прерывание
 
-	pushf
+	
 	mov ah, 9h
 	mov dx, offset mes
 	int 21h
 	
-	call dword ptr cs:[default00Vector]  ; Зовем стандартный обработчик
-
 	pop ds;восстановил ds вызывающей программы
-	
+	jmp dword ptr cs:[default00Vector]  ; Зовем стандартный обработчик
+
 	iret ; восстановит cs
 
 
