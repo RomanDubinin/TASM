@@ -271,8 +271,10 @@ db 'k - kill$',10,13
 db '$',10,13
 
 cannotUninstall db 'cannot uninstall resident$'
-cannotInstallMess db 'cannot install resident$'
+cannotInstallMess db 'resident alrady in table$'
 cannotKill db 'cannot kill$'
+exists db 'resident exests$'
+absent db 'resident is absent$'
 
 help proc
 	pusha
@@ -394,23 +396,50 @@ kill proc
 
 kill endp
 
+status proc
+	popa
+	
+	mov ax, 8883h
+	int 2fh
+	cmp ax, 0
+	jne @absent
+	
+	mov ah, 9h
+	mov dx, offset exists
+	int 21h
+	call printNewString
+	call printInfo
+	jmp @statusEnd
+	
+	@absent:
+	mov ah, 9h
+	mov dx, offset absent
+	int 21h
+	call printNewString
+	call printInfo
+	
+	@statusEnd:
+	pusha
+	ret
+status endp
+
 
 main:
 	
-	mov cl, 5
+	mov cl, 6
 	
 	mov al, cs:[82h]
 	lea di, keys
 	
-	repne scasb
-	shl cx, 1
+	repne scasb ; es:di - ax
+	shl cx, 1 ; *2
 	mov di, cx
 	call lbs[di]
 	
 	mov ah,04Ch
     int 21h
 	
-	keys db 'uikh'
-	lbs dw help, help, kill, install, uninstall
+	keys db 'suikh'
+	lbs dw help, help, kill, install, uninstall, status
 cseg ends	
 end ENTRY
