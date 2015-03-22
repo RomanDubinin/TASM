@@ -30,6 +30,21 @@ printBX proc
 	ret
 printBX endp
 
+printVideoMode proc
+	pusha
+	
+	mov ah, 0Fh
+	int 10h
+	
+	mov bl, 0
+	call printBX
+	mov bx, ax
+	call printBX
+	
+	popa
+	ret
+printVideoMode endp
+
 
 IsHexChar proc
 	cmp al, 'A'
@@ -91,7 +106,7 @@ IsHexChar endp
 	or dl, al
 	loop @loop2
 	
-	mov bx, dx; bx - first param : second param
+	mov di, dx; di - first param : second param
 	
 	mov cx, 0
 	
@@ -107,10 +122,36 @@ IsHexChar endp
 	mov cx, 1
 	
 	@doThings:
-	call printBX
+	mov ah, 0Fh
+	int 10h ; запомнил
+	mov si, ax
+	
+	; set v mode
+	mov ah, 00h
+	mov al, dh
+	int 10h
+	
+	;set page
+	mov ah, 05h
+	mov al, dl
+	int 10h
+	
+	call printVideoMode
 	
 	cmp cx, 0
-	je @exit
+	je @exit; /- не установлен
+	
+	mov ah, 00h
+	int 16h
+	
+	mov ax, si
+	
+	mov ah, 00h
+	int 10h
+	
+	mov ah, 05h
+	mov al, bh
+	int 10h
 	
 	mov ah, 02h
 	mov dx, '*'
@@ -129,3 +170,4 @@ IsHexChar endp
 	
 	paramErrorMsg db 'param error$'
 end @entry 
+cs ends
