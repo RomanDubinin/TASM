@@ -16,11 +16,11 @@ printBX proc
 	pusha
 	mov cx, 4 
 @k:
-	rol bx, 4 ; bx = 0001000000010000
+	rol bx, 4 ; bx = 0001000000010000 ; cyсle rotate left
 	mov al, bl ; al = 00010000
 	and al, 0fh ; al = 00000000
-	cmp al, 10
-	sbb al, 69h
+	cmp al, 10 
+	sbb al, 69h ; op1 - (op2 + cf)
 	das
 	mov dh, 02h
 	xchg ax, dx
