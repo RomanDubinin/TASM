@@ -55,29 +55,68 @@ insert proc ; ax - val
 	ret
 insert endp
 	
+erase proc
+	push di
+	
+	call isEmpty
+	je @endErase
+	
+	mov di, cs:[tail]
+	mov ax, cs:[di]
+	
+	call closedInc
+	mov tail, di
+	
+	@endErase:
+	
+	pop di
+	ret
+erase endp
+	
 @start:
-	
-	mov di, [tail]
-	mov cx, [di]
-	
 	mov ax, 3
 	call insert
-	
 	mov ax, 3
 	call insert
-	
-	mov ax, 3
-	call insert
-	
-	mov ax, 3
-	call insert
-	
-	
-	mov ax, 3
-	call insert
-	
 	mov ax, 4
 	call insert
+	mov ax, 5
+	call insert
+	mov ax, 6
+	call insert
+	
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	mov ax, 10
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	mov ax, 10
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	mov ax, 10
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	mov ax, 10
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	mov ax, 10
+	
+	
+	
+	
+	mov ah, 02h
+	mov dx, '-'
+	int 21h
 	
 	mov cx, bufSize
 	shr cx, 1
