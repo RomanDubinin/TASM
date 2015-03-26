@@ -50,7 +50,14 @@ insert proc ; ax - val
 	ret
 	
 	@dataMiss:
-	add tail, 2
+	mov ah, 02h
+	mov dx, '?'
+	int 21h
+	
+	mov di, cs:[tail]
+	call closedInc
+	mov tail, di
+	
 	popa
 	ret
 insert endp
@@ -72,44 +79,34 @@ erase proc
 	pop di
 	ret
 erase endp
+
+keyboardHook proc
+	
+	@hookLoop:
+	
+	mov ah, 0h
+	int 16h
+	
+	cmp al, ' '
+	je @out
+	
+	mov ah, 0h;crutch
+	call insert
+	jmp @hookLoop
+	
+	@out:
+	call erase
+	mov ah, 02h
+	mov dx, ax
+	int 21h
+	
+	jmp @hookLoop
+	
+	;iret
+keyboardHook endp
 	
 @start:
-	mov ax, 3
-	call insert
-	mov ax, 3
-	call insert
-	mov ax, 4
-	call insert
-	mov ax, 5
-	call insert
-	mov ax, 6
-	call insert
-	
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	mov ax, 10
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	mov ax, 10
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	mov ax, 10
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	mov ax, 10
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	mov ax, 10
+	call keyboardHook
 	
 	
 	
