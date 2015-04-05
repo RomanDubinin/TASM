@@ -109,10 +109,6 @@ IsHexChar endp
 	mov di, dx; di - first param : second param
 	
 	@doThings:
-	;mov ah, 0Fh
-	;int 10h ; запомнил
-	;mov si, ax
-	
 	; set v mode
 	mov ah, 00h
 	mov al, dh
@@ -123,7 +119,12 @@ IsHexChar endp
 	mov al, dl
 	int 10h
 	
-	;call printVideoMode
+	;left treshold
+	mov ah, 0Fh
+	int 10h 
+	mov cs:[left], ah
+	shr cs:[left], 1
+	sub cs:[left], byte ptr 8
 	
 	mov bx, dx; page & mode in bx
 	mov bh, bl
@@ -171,7 +172,7 @@ IsHexChar endp
 	int 21h
 	
 	paramErrorMsg db 'param error$'
-	left db 12
+	left db 0
 	up db 4
 end @entry 
 cs ends
