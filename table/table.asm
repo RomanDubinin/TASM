@@ -110,6 +110,8 @@ VerticalLine endp
 ViewTableItems proc
 	pusha
 	
+	call ViewSpeciallRollAndCollumn
+	
 	mov bl, 12h
 	;horizontal lines
 	mov dl, cs:[left]
@@ -228,6 +230,79 @@ ViewTableItems proc
 	popa
 	ret
 ViewTableItems endp
+
+ViewSpeciallRollAndCollumn proc
+	pusha
+	
+	mov bl, 5h
+	
+	mov dl, cs:[left]
+	sub dl, 2
+	mov dh, cs:[up]
+	
+	mov al, '0'
+	@speciallColumnCycle1:
+	mov ah, 02h
+	int 10h
+	mov ah, 09h
+	int 10h
+	inc al
+	inc dh
+	cmp al, '9'
+	jng @speciallColumnCycle1
+	
+	mov al, 'A'
+	@speciallColumnCycle2:
+	mov ah, 02h
+	int 10h
+	mov ah, 09h
+	int 10h
+	inc al
+	inc dh
+	cmp al, 'F'
+	jng @speciallColumnCycle2
+	
+	mov dl, cs:[left]
+	mov dh, cs:[up]
+	sub dh, 2
+	
+	mov al, '0'
+	@speciallRowCycle1:
+	mov ah, 02h
+	int 10h
+	mov ah, 09h
+	int 10h
+	inc al
+	inc dl
+	cmp al, '9'
+	jng @speciallRowCycle1
+	
+	mov al, 'A'
+	@speciallRowCycle2:
+	mov ah, 02h
+	int 10h
+	mov ah, 09h
+	int 10h
+	inc al
+	inc dl
+	cmp al, 'F'
+	jng @speciallRowCycle2
+	
+	mov dl, cs:[left]
+	mov dh, cs:[up]
+	sub dh, 2
+	sub dl, 2
+	
+	mov ah, 02h
+	int 10h
+	
+	mov al, '\'
+	mov ah, 09h
+	int 10h
+	
+	popa
+	ret
+ViewSpeciallRollAndCollumn endp
 
 @start:
 	
