@@ -73,9 +73,164 @@ IsHexChar proc
 	ret
 IsHexChar endp
 
+HorizontLine proc;рисую оттуда, куда поставлен курсор
+	pusha
+	
+	;понадеюсь на bh
+	mov cx, 18
+	mov al, 205
+	mov ah, 09h
+	;mov bl, 12h
+	int 10h
+	
+	popa
+	ret
+HorizontLine endp
 
+VerticalLine proc
+	pusha
+	
+	mov cx, 1
+	;mov bl, 12h
+	
+	@verticalCycle:
+	mov ah, 02h
+	int 10h
+	mov al, 186
+	mov ah, 09h
+	int 10h
+	inc dh
+	cmp dh ,20
+	jne @verticalCycle
+	
+	popa
+	ret
+VerticalLine endp
+
+ViewTableItems proc
+	pusha
+	
+	mov bl, 12h
+	;horizontal lines
+	mov dl, cs:[left]
+	sub dl, 2
+	mov dh, cs:[up]
+	sub dh, 3
+	mov ah, 02h
+	int 10h
+	call HorizontLine
+	
+	add dh, 2
+	int 10h
+	call HorizontLine
+	
+	add dh, 17
+	int 10h
+	call HorizontLine
+	
+	;vertical lines
+	mov dl, cs:[left]
+	sub dl, 3
+	mov dh, cs:[up]
+	sub dh, 2
+	mov ah, 02h
+	int 10h
+	call VerticalLine
+	
+	add dl, 2
+	int 10h
+	call VerticalLine
+	
+	add dl, 17
+	int 10h
+	call VerticalLine
+	
+	;angles
+	mov cx, 1
+	
+	mov dl, cs:[left]
+	sub dl, 3
+	mov dh, cs:[up]
+	sub dh, 3
+	mov ah, 02h
+	int 10h
+	
+	mov al, 201
+	mov ah, 09h
+	int 10h
+	
+	add dl, 2
+	mov ah, 02h
+	int 10h
+	mov al, 203
+	mov ah, 09h
+	int 10h
+	
+	add dl, 17
+	mov ah, 02h
+	int 10h
+	mov al, 187
+	mov ah, 09h
+	int 10h
+	
+	mov dl, cs:[left]
+	sub dl, 3
+	mov dh, cs:[up]
+	sub dh, 1
+	mov ah, 02h
+	int 10h
+	
+	mov al, 204
+	mov ah, 09h
+	int 10h
+	
+	add dl, 2
+	mov ah, 02h
+	int 10h
+	mov al, 206
+	mov ah, 09h
+	int 10h
+	
+	add dl, 17
+	mov ah, 02h
+	int 10h
+	mov al, 185
+	mov ah, 09h
+	int 10h
+	
+	mov dl, cs:[left]
+	sub dl, 3
+	mov dh, cs:[up]
+	add dh, 16
+	mov ah, 02h
+	int 10h
+	
+	mov al, 200
+	mov ah, 09h
+	int 10h
+	
+	add dl, 2
+	mov ah, 02h
+	int 10h
+	
+	mov al, 202
+	mov ah, 09h
+	int 10h
+	
+	add dl, 17
+	mov ah, 02h
+	int 10h
+	
+	mov al, 188
+	mov ah, 09h
+	int 10h
+	
+	popa
+	ret
+ViewTableItems endp
 
 @start:
+	
 	cmp ds:[80h], byte ptr 4
 	jl @paramError
 	cmp ds:[82h], byte ptr '/'
@@ -132,7 +287,7 @@ IsHexChar endp
 	xor ax, ax
 	xor dx, dx
 	@sycle:
-
+    
 	;output
 	add dl, cs:[left]
 	add dh, cs:[up]
@@ -159,6 +314,7 @@ IsHexChar endp
 	test dh, 0fh
 	jne @sycle
 	
+	call ViewTableItems
 	
 	@exit:
 	ret
