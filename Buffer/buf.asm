@@ -8,6 +8,7 @@ Org 100h
 	bufSize dw $ - offset buf
 	head dw offset buf
 	tail dw offset buf
+	oldInt9 dd ?
 	
 isEmpty proc
 	pusha
@@ -42,6 +43,7 @@ insert proc ; ax - val
 	
 	mov di, cs:[head] ; address 
 	mov cs:[di], ax
+	
 	call closedInc
 	mov head, di
 	call isEmpty
@@ -51,7 +53,7 @@ insert proc ; ax - val
 	
 	@dataMiss:
 	mov ah, 02h
-	mov dx, '?'
+	mov dx, 'm'
 	int 21h
 	
 	mov di, cs:[tail]
@@ -80,68 +82,70 @@ erase proc
 	ret
 erase endp
 
-keyboardHook proc
+int9:
+	; in - read from port
+	; out - write into port
+	in al, 60h
 	
-	@hookLoop:
+	call Insert
 	
-	mov ah, 0h
-	int 16h
+	in al, 61h
+	or al, 80h ; выставить старший бит 1
+	out 61h, al
+	and al, 07fh
+	out 61h, al
 	
-	cmp al, ' '
-	je @out
-	
-	mov ah, 0h;crutch
-	call insert
-	jmp @hookLoop
-	
-	@out:
-	call erase
-	mov ah, 02h
-	mov dx, ax
-	int 21h
-	
-	jmp @hookLoop
-	
-	;iret
-keyboardHook endp
-	
+	mov al, 20h
+	out 20h, al
+	iret
+
+; скан-коды клавиш
+space db 039h
+escCode db 81h
+spaceMsg db 'space', 13, 10, '$'
+notSpaceMsg db 'not space', 13, 10, '$'
+
 @start:
-	call keyboardHook
-	
-	
-	
-	
-	mov ah, 02h
-	mov dx, '-'
+	xor dx, dx
+mov ax, 3509h
 	int 21h
+	mov word ptr oldInt9,   bx
+	mov word ptr oldInt9+2, es
 	
-	mov cx, bufSize
-	shr cx, 1
-	mov di, offset buf
-	@loop1:
-	mov ah, 02h
-	mov dx, [di]
-	add di, 2
+	cli
+	mov ax, 2509h
+	mov dx, offset int9
 	int 21h
-	mov ah, 02h
-	mov dx, '_'
+	sti
+	
+	spaceWriter:
+	call isEmpty
+	je spaceWriter
+	
+	call erase
+	cmp al, space
+	jne notSpace
+	mov ax, 0900h
+	lea dx, spaceMsg
 	int 21h
-	loop @loop1
+	jmp spaceWriter
 	
-	;mov ax, bufSize
-	;call isEmpty
-	;je @e
-	;
-	;mov ah, 02h
-	;mov dx, '-'
-	;int 21h
-	;ret
-	;
-	;@e:
-	;mov ah, 02h
-	;mov dx, '+'
-	;int 21h
+	notSpace:
+	cmp al, escCode
+	je terminate
+	mov ax, 0900h
+	lea dx, notSpaceMsg
+	int 21h
+	jne spaceWriter
 	
+	terminate:
+	cli
+	mov ax, 2509h
+	mov dx, word ptr cs:[oldInt9]
+	mov ds, word ptr cs:[oldInt9+2]
+	int 21h
+	sti
 	ret
+			
 end @entry 
 cseg ends
