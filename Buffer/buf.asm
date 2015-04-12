@@ -10,6 +10,25 @@ Org 100h
 	tail dw offset buf
 	oldInt9 dd ?
 	
+printBL proc
+	pusha
+	mov cx, 2
+	shl bx, 8
+	@k:
+	rol bx, 4 ; bx = 0001000000010000
+	mov al, bl ; al = 00010000
+	and al, 0fh ; al = 00000000
+	cmp al, 10
+	sbb al, 69h
+	das
+	mov dh, 02h
+	xchg ax, dx
+	int 21h
+	loop @k
+	popa
+	ret
+printBL endp
+	
 isEmpty proc
 	pusha
 	mov ax, head
@@ -123,18 +142,12 @@ mov ax, 3509h
 	je spaceWriter
 	
 	call erase
-	cmp al, space
-	jne notSpace
-	mov ax, 0900h
-	lea dx, spaceMsg
-	int 21h
-	jmp spaceWriter
-	
-	notSpace:
 	cmp al, escCode
 	je terminate
-	mov ax, 0900h
-	lea dx, notSpaceMsg
+	mov bx, ax
+	call printBL
+	mov ah, 02h
+	mov dl, 10
 	int 21h
 	jne spaceWriter
 	
