@@ -59,6 +59,17 @@ no_sound proc
 	ret
 no_sound endp
 
+int1c proc
+	push ds
+	push cs
+	pop ds
+	inc curtime
+	pop ds
+	db 0EAh
+	i1c dw 0, 0
+	ret
+int1c endp
+
 findIndex proc
 	push cx
 	push di
@@ -215,6 +226,9 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	call printBX
 	mov ax, lbs[di]
 	call sound
+	;call int1c
+	;call no_sound
+	
 	
 	mov ah, 02h
 	mov dl, 10
@@ -235,9 +249,11 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	sti
 	ret
 	
-	keys dw 01,  02, 03, 04, 05, 06, 07, 08
+	curtime dw 0
+	
+	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
 	masLen dw $ - keys - 1
-	lbs dw 0h, 261, 293, 329, 349, 392, 440, 493
+	lbs dw 0h, 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
 	
 end @entry 
 cseg ends
