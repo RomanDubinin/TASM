@@ -204,6 +204,8 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	call erase
 	cmp al, escCode
 	je terminate
+	cmp al, space
+	je stopSound
 	mov ah, 0h
 	call findIndex
 	mov di, ax
@@ -219,6 +221,10 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	int 21h
 	jne spaceWriter
 	
+	stopSound:
+	call no_sound
+	jmp spaceWriter
+	
 	terminate:
 	call no_sound
 	cli
@@ -230,7 +236,7 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	ret
 	
 	keys dw 01,  02, 03, 04, 05, 06, 07, 08
-	masLen dw $ - keys
+	masLen dw $ - keys - 1
 	lbs dw 0h, 261, 293, 329, 349, 392, 440, 493
 	
 end @entry 
