@@ -9,6 +9,7 @@ Org 100h
 	head dw offset buf
 	tail dw offset buf
 	oldInt9 dd ?
+	oldInt1 dd ?
 	
 printBX proc
 	pusha
@@ -60,14 +61,17 @@ no_sound proc
 no_sound endp
 
 int1c proc
+	mov ah, 02h
+	mov dx, '1'
+	int 21h
 	push ds
 	push cs
 	pop ds
-	inc curtime
+	
+	inc currentTime
 	pop ds
-	db 0EAh
-	i1c dw 0, 0
-	ret
+	db 0eah
+	l1c dw 0, 0
 int1c endp
 
 findIndex proc
@@ -208,6 +212,18 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	int 21h
 	sti
 	
+	mov ax, 3501h
+	int 21h
+	mov word ptr oldInt1,   bx
+	mov word ptr oldInt1+2, es
+	
+	
+	cli
+	mov ax, 2501h
+	mov dx, offset int1c
+	int 21h
+	sti
+	
 	spaceWriter:
 	call isEmpty
 	je spaceWriter
@@ -226,7 +242,13 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	call printBX
 	mov ax, lbs[di]
 	call sound
-	;call int1c
+	
+	;mov bx, currentTime + 20
+	;@wait:
+	;call printBX
+	;mov ax, currentTime
+	;cmp bx, ax
+	;jl @wait
 	;call no_sound
 	
 	
@@ -246,10 +268,16 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	mov dx, word ptr cs:[oldInt9]
 	mov ds, word ptr cs:[oldInt9+2]
 	int 21h
-	sti
+	
+	mov ax, 2501h
+	mov dx, word ptr cs:[oldInt1]
+	mov ds, word ptr cs:[oldInt1+2]
+	int 21h
+	
 	ret
 	
-	curtime dw 0
+	currentTime dw 0
+	nextTime dw 0
 	
 	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
 	masLen dw $ - keys - 1
