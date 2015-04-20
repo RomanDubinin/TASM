@@ -260,7 +260,8 @@ buf1 db 60 dup(0)
 	mov ah, 02h
 	mov di, cx
 	mov al, buf1[di]
-	mov ah, 02h
+	inc cx
+	mov ah, 0h
 	
 	cmp al, '`'
 	je @playerExit
@@ -271,9 +272,14 @@ buf1 db 60 dup(0)
 	;cmp di, 0
 	;je @unknownSymbol
 	
-	
-	mov dl, al
-	int 21h
+	sub ax, '0'
+	shl ax, 4
+	mov di, cx
+	add al, buf1[di]
+	sub al, '0'
+	inc cx
+	mov bx, ax
+	call printBX
 	
 	inc cx
 	jmp @cycle
