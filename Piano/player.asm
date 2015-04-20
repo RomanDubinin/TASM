@@ -94,15 +94,15 @@ findIndex proc
 	push di
 	push bx
 	
-	mov cx, masLen
+	mov cx, notesLen
 	shl cx, 1
-	lea di, keys
+	lea di, noteKodes
 	
 	@loop:
 	dec cx
 	dec cx
 	mov di, cx
-	mov bx, keys[di]
+	mov bx, noteKodes[di]
 	cmp ax, bx
 	je @loopEnd
 	cmp cx, 0
@@ -280,7 +280,7 @@ buf1 db 60 dup(0)
 	
 	cmp di, 0
 	je @unknownSymbol
-	mov ax, lbs[di]
+	mov ax, noteFrequencies[di]
 	
 	call sound
 	mov bx, currentTime
@@ -323,9 +323,13 @@ buf1 db 60 dup(0)
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
-	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
-	masLen dw $ - keys - 1
-	lbs dw 0h, 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
+	noteKodes dw 00h, 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
+	notesLen dw $ - noteKodes - 1
+	noteFrequencies dw 0h, 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
+	
+	pausesKodes dw 00h, 02h, 03h
+	pausesLen dw $ - pausesKodes - 1
+	pausesLens dw 00h, 05h, 0Ah
 	
 end @entry 
 cseg ends
