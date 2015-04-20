@@ -49,6 +49,9 @@ printBX endp
 
 sound proc
     pusha
+	cmp ax, 0h
+	je @doNotSound
+	
     mov bx, ax
 	mov ax, 34ddh
 	mov dx, 12h
@@ -66,6 +69,11 @@ sound proc
 	mov al, bh
 	out dx, al
     popa
+    ret
+	
+	@doNotSound:
+	call no_sound
+	popa
     ret
 sound endp
 
@@ -266,8 +274,6 @@ buf1 db 60 dup(0)
 	cmp al, '`'
 	je @playerExit
 	
-	
-	
 	sub ax, '0'
 	shl ax, 4
 	mov di, cx
@@ -324,9 +330,9 @@ buf1 db 60 dup(0)
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
-	noteKodes dw 00h, 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
+	noteKodes dw 00h, 99h,	 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
 	notesLen dw $ - noteKodes - 1
-	noteFrequencies dw 0h, 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
+	noteFrequencies dw 0h, 0h,	 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
 	
 	pausesKodes dw 00h, 02h, 03h
 	pausesLen dw $ - pausesKodes - 1
