@@ -197,9 +197,6 @@ spaceMsg db 'space', 13, 10, '$'
 notSpaceMsg db 'not space', 13, 10, '$'
 
 @start:
-
-
-
 	xor dx, dx
 	mov ax, 3509h
 	int 21h
