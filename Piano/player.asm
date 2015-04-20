@@ -266,11 +266,7 @@ buf1 db 60 dup(0)
 	cmp al, '`'
 	je @playerExit
 	
-	;call findIndex
-	;mov di, ax
-	;
-	;cmp di, 0
-	;je @unknownSymbol
+	
 	
 	sub ax, '0'
 	shl ax, 4
@@ -278,11 +274,32 @@ buf1 db 60 dup(0)
 	add al, buf1[di]
 	sub al, '0'
 	inc cx
-	mov bx, ax
+	; key in ax
+	call findIndex
+	mov di, ax
+	
+	cmp di, 0
+	je @unknownSymbol
+	mov ax, lbs[di]
+	
+	call sound
+	mov bx, currentTime
+	add bx, 5h
 	call printBX
+	@wait:
+	mov ax, currentTime
+	;call printBX
+	cmp bx, ax
+	ja @wait
+	call no_sound
 	
 	inc cx
 	jmp @cycle
+	
+	@unknownSymbol:
+	mov ah, 09h
+	lea dx, unknownSymbolStr
+	int 21h
 	
 	@playerExit:
 	call no_sound
@@ -297,6 +314,8 @@ buf1 db 60 dup(0)
 	mov ds, word ptr cs:[oldInt1+2]
 	int 21h
 	ret
+	
+	unknownSymbolStr db 'unknown', 10, 13, '$'
 	
 	currentTime dw 0
 	nextTime dw 0
