@@ -330,9 +330,9 @@ buf1 db 60 dup(0)
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
-	noteKodes dw 00h, 99h,	 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
+	noteKodes dw 00h, 99h,	 01h, 02h, 03h, 04h, 05h, 06h, 07h,	 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
 	notesLen dw $ - noteKodes - 1
-	noteFrequencies dw 0h, 0h,	 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
+	noteFrequencies dw 0h, 0h,	130, 147, 164, 174, 196, 220, 246,	 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
 	
 	pausesKodes dw 00h, 02h, 03h
 	pausesLen dw $ - pausesKodes - 1
