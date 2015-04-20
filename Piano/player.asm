@@ -97,24 +97,29 @@ int1c proc
 	l1c dw 0, 0
 int1c endp
 
-findIndex proc ; ax - index, dx mas pointer
+findIndex proc ; ax - index, dx mas pointer, bx - masLen
 	push cx
 	push di
 	push bx
 	
-	mov cx, notesLen
-	shl cx, 1
+	mov cx, bx
+	;shl cx, 1
+	dec cx
+	mov di, cx
+	add di, dx
+	mov bx, [di]
+	call printBX
 	
 	@loop:
-	dec cx
-	dec cx
 	mov di, cx
 	add di, dx
 	mov bx, [di]
 	cmp ax, bx
 	je @loopEnd
+	dec cx
+	dec cx
 	cmp cx, 0
-	jne @loop
+	jg @loop
 	
 	@loopEnd:
 	mov ax, cx
@@ -231,6 +236,19 @@ buf1 db 60 dup(0)
 
 @start:
 
+	
+	;mov bx, pausesLen
+	;mov di, bx
+	;dec di
+	;@c:
+	;mov bx, pausesKodes[di]
+	;call printBX
+	;dec di
+	;dec di
+	;cmp di, 0
+	;jg @c
+	;ret
+
 	mov ax, 3509h
 	int 21h
 	mov word ptr oldInt9,   bx
@@ -282,17 +300,37 @@ buf1 db 60 dup(0)
 	inc cx
 	; key in ax
 	lea dx, noteKodes
+	mov bx, notesLen
 	call findIndex
 	mov di, ax
 	
 	cmp di, 0
 	je @unknownSymbol
 	mov ax, noteFrequencies[di]
+	push ax
+	
+	mov di, cx
+	mov al, buf1[di]
+	sub al, '0'
+	mov ah, 0h;
+	inc cx
+	mov bx, ax
+	;call printBX
+	; key in ax
+	lea dx, pausesKodes
+	mov bx, pausesLen
+	call findIndex
+	
+	mov di, ax
+	cmp di, 0
+	je @unknownSymbol
+	mov ax, pausesLens[di]
+	mov bx, ax
+	pop ax
 	
 	call sound
-	mov bx, currentTime
-	add bx, 5h
-	call printBX
+	add bx, currentTime
+	
 	@wait:
 	mov ax, currentTime
 	;call printBX
@@ -330,13 +368,13 @@ buf1 db 60 dup(0)
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
-	noteKodes dw 00h, 99h,	 01h, 02h, 03h, 04h, 05h, 06h, 07h,	 11h, 12h, 13h, 14h, 15h, 16h, 17h,	 21h, 22h, 23h, 24h, 25h, 26h, 27h, 	31h, 32h, 33h, 34h, 35h, 36h, 37h
+	noteKodes dw 00h, 99h, 01h, 02h, 03h, 04h, 05h, 06h, 07h, 11h, 12h, 13h, 14h, 15h, 16h, 17h, 21h, 22h, 23h, 24h, 25h, 26h, 27h, 31h, 32h, 33h, 34h, 35h, 36h, 37h
 	notesLen dw $ - noteKodes - 1
 	noteFrequencies dw 0h, 0h,	130, 147, 164, 174, 196, 220, 246,	 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
 	
-	pausesKodes dw 00h, 02h, 03h
+	pausesKodes dw 00h, 01h, 02h, 03h, 04h, 05h, 06h, 07h
 	pausesLen dw $ - pausesKodes - 1
-	pausesLens dw 00h, 05h, 0Ah
+	pausesLens dw 00h, 36, 18, 9, 14, 5, 7, 2
 	
 end @entry 
 cseg ends
