@@ -61,9 +61,6 @@ no_sound proc
 no_sound endp
 
 int1c proc
-	mov ah, 02h
-	mov dx, '1'
-	int 21h
 	push ds
 	push cs
 	pop ds
@@ -200,6 +197,9 @@ spaceMsg db 'space', 13, 10, '$'
 notSpaceMsg db 'not space', 13, 10, '$'
 
 @start:
+
+
+
 	xor dx, dx
 	mov ax, 3509h
 	int 21h
@@ -212,18 +212,23 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	int 21h
 	sti
 	
-	mov ax, 3501h
+	mov ax, 351ch
 	int 21h
+	mov l1c, bx
+	mov l1c + 2, es
 	mov word ptr oldInt1,   bx
 	mov word ptr oldInt1+2, es
 	
 	
 	cli
-	mov ax, 2501h
+	mov ax, 251ch
 	mov dx, offset int1c
 	int 21h
 	sti
 	
+	mov ah, 02h
+	mov dx, 's'
+	int 21h
 	spaceWriter:
 	call isEmpty
 	je spaceWriter
@@ -239,17 +244,20 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	cmp di, 0
 	je spaceWriter
 	mov bx, keys[di]
-	call printBX
+	;call printBX
 	mov ax, lbs[di]
+	
 	call sound
 	
-	;mov bx, currentTime + 20
-	;@wait:
+	mov bx, currentTime
+	add bx, 5h
+	call printBX
+	@wait:
+	mov ax, currentTime
 	;call printBX
-	;mov ax, currentTime
-	;cmp bx, ax
-	;jl @wait
-	;call no_sound
+	cmp bx, ax
+	ja @wait
+	call no_sound
 	
 	
 	mov ah, 02h
@@ -269,7 +277,7 @@ notSpaceMsg db 'not space', 13, 10, '$'
 	mov ds, word ptr cs:[oldInt9+2]
 	int 21h
 	
-	mov ax, 2501h
+	mov ax, 251ch
 	mov dx, word ptr cs:[oldInt1]
 	mov ds, word ptr cs:[oldInt1+2]
 	int 21h
