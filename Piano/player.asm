@@ -89,20 +89,20 @@ int1c proc
 	l1c dw 0, 0
 int1c endp
 
-findIndex proc
+findIndex proc ; ax - index, dx mas pointer
 	push cx
 	push di
 	push bx
 	
 	mov cx, notesLen
 	shl cx, 1
-	lea di, noteKodes
 	
 	@loop:
 	dec cx
 	dec cx
 	mov di, cx
-	mov bx, noteKodes[di]
+	add di, dx
+	mov bx, [di]
 	cmp ax, bx
 	je @loopEnd
 	cmp cx, 0
@@ -275,6 +275,7 @@ buf1 db 60 dup(0)
 	sub al, '0'
 	inc cx
 	; key in ax
+	lea dx, noteKodes
 	call findIndex
 	mov di, ax
 	
