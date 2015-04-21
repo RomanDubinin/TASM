@@ -15,7 +15,7 @@ Readf proc
 	mov bx, ax; hendler
 	
 	mov ah, 3fh ; read
-	mov cx, 64   ; size
+	mov cx, 640   ; size
 	mov dx, [bp+18]
 	int 21h
 	add dx, -2 ;real size
@@ -229,24 +229,27 @@ int9:
 
 
 
-key1 db "1.txt"
+key1 db 60 dup(0)
 buf1 db 60 dup(0)
 
 
 
 @start:
 
+	xor cx, cx
+	mov cl, cs:[80h]
+	mov si, 0h
+	mov di, 82h
+	@readFileName:
 	
-	;mov bx, pausesLen
-	;mov di, bx
-	;dec di
-	;@c:
-	;mov bx, pausesKodes[di]
-	;call printBX
-	;dec di
-	;dec di
-	;cmp di, 0
-	;jg @c
+	mov bl, cs:[di]
+	mov key1[si], bl
+	
+	inc si
+	inc di
+	dec cx
+	cmp cx, 1h
+	jne @readFileName
 	;ret
 
 	mov ax, 3509h
