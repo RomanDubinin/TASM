@@ -332,9 +332,12 @@ buf1 db 60 dup(0)
 	add bx, currentTime
 	
 	@wait:
-	mov ax, currentTime
-	;call printBX
-	cmp bx, ax
+	mov ax, 0h
+	call erase
+	cmp al, 81h
+	je @playerExit
+	mov dx, currentTime
+	cmp bx, dx
 	ja @wait
 	call no_sound
 	
