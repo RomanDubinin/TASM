@@ -161,10 +161,17 @@ int33 proc
 	mov [y], dx; dx - y
 	
 	cmp bx, 2h
-	jne @Exit33
+	jne @NotR33
 	
 	mov ax, 81h
 	call insert
+	
+	@NotR33:
+	
+	cmp bx, 1h
+	jne @Exit33
+	
+	mov [leftDown], 1h
 	
 	@Exit33:
 	popa
@@ -197,7 +204,7 @@ int33 endp
 	mov ax, 0001h
 	int 33h
 	
-	mov cx, 9
+	mov cx, 11
 	mov ax, 000ch
 	lea dx, int33
 	int 33h
@@ -220,7 +227,6 @@ int33 endp
 	
 	;/////////////////////////////////////
 
-	mov dl, '1'
 	@cycle:
 	
 	
@@ -238,12 +244,16 @@ int33 endp
 	mov dx, 0h
 	int 10h
 	
+	cmp [leftDown], 1h
+	jne @cycle
+	
 	mov bx, [x]
 	call printBX
 	mov bx, [y]
 	call printBX
 	
-	inc dl
+	mov [leftDown], 0h
+	
 	jmp @cycle
 	
 	@Exit:
@@ -270,6 +280,7 @@ int33 endp
 	
 	x dw ?
 	y dw ?
+	leftDown db 0h
 	
 end @entry 
 cseg ends
