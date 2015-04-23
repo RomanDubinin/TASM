@@ -155,8 +155,26 @@ int9:
 	
 int33 proc
 	pusha
-	mov ax, 228h
-	call insert
+	
+	push cx
+	push dx
+	
+	mov ah, 0fh
+	int 10h
+	
+	mov ah, 02h
+	mov dx, 0h
+	int 10h
+	
+	pop dx
+	pop cx
+	
+	mov bx, cx; cx - x
+	call printBX
+	
+	mov bx, dx; dx - y
+	call printBX
+	
 	popa
 	retf
 int33 endp
@@ -187,7 +205,7 @@ int33 endp
 	mov ax, 0001h
 	int 33h
 	
-	mov cx, 8
+	mov cx, 9
 	mov ax, 000ch
 	lea dx, int33
 	int 33h
@@ -233,6 +251,10 @@ int33 endp
 	mov ax, 000ch
 	lea dx, int33
 	int 33h
+	
+	mov ah, 00h
+	mov al, 3h
+	int 10h
 	
 	ret
 
