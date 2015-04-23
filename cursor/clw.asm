@@ -156,25 +156,17 @@ int9:
 int33 proc
 	pusha
 	
-	push cx
-	push dx
 	
-	mov ah, 0fh
-	int 10h
+	mov [x], cx; cx - x
+	mov [y], dx; dx - y
 	
-	mov ah, 02h
-	mov dx, 0h
-	int 10h
+	cmp bx, 2h
+	jne @Exit33
 	
-	pop dx
-	pop cx
+	mov ax, 81h
+	call insert
 	
-	mov bx, cx; cx - x
-	call printBX
-	
-	mov bx, dx; dx - y
-	call printBX
-	
+	@Exit33:
 	popa
 	retf
 int33 endp
@@ -228,15 +220,30 @@ int33 endp
 	
 	;/////////////////////////////////////
 
-
+	mov dl, '1'
 	@cycle:
+	
+	
 	xor ax, ax
 	call erase
-	cmp ax, 81h
-	je @Exit
-	cmp ax, 228h
+	
+	cmp al, 81h
 	je @Exit
 	
+	
+	mov ah, 0fh
+	int 10h
+	
+	mov ah, 02h
+	mov dx, 0h
+	int 10h
+	
+	mov bx, [x]
+	call printBX
+	mov bx, [y]
+	call printBX
+	
+	inc dl
 	jmp @cycle
 	
 	@Exit:
@@ -260,6 +267,9 @@ int33 endp
 
 	oldInt9 dd ?
 	oldInt1 dd ?
+	
+	x dw ?
+	y dw ?
 	
 end @entry 
 cseg ends
