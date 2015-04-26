@@ -5,6 +5,61 @@ assume CS:cseg, DS:cseg, SS:cseg
 Org 100h  
 @entry: jmp @start
 
+OutInt proc
+	pusha
+	;mov bx, ax
+	;call printBX
+; Проверяем число на знак.
+	test ax, ax
+	jns oi1
+
+; Если оно отрицательное, выведем минус и оставим его модуль.
+	mov  cx, ax
+	mov ah, 02h
+	mov dl, '-'
+	int 21h
+	mov ax, cx
+	neg ax
+; Количество цифр будем держать в CX.
+oi1:
+	xor cx, cx
+	mov bx, 10
+oi2:
+	xor dx,dx
+	div bx
+; Делим число на основание сс. В остатке получается последняя цифра.
+; Сразу выводить её нельзя, поэтому сохраним её в стэке.
+	push dx
+	inc cx
+	mov di, 3h
+	sub di, cx
+; А с частным повторяем то же самое, отделяя от него очередную
+; цифру справа, пока не останется ноль, что значит, что дальше
+; слева только нули.
+	test ax, ax
+	jnz oi2
+	mov ah, 02h
+oi3:
+	pop dx
+	add dl, '0'
+	int 21h
+	loop oi3
+	
+	mov bx, di
+	cmp bx, 0h
+	je @exitOut
+outSpase:
+	mov dl, ' '
+	int 21h
+	dec bx
+	cmp bx, 0h
+	jne outSpase
+	
+	@exitOut:
+	popa
+	ret
+OutInt endp
+
 printBX proc
 	pusha
 	mov cx, 4
@@ -180,21 +235,9 @@ int33 endp
 
 
 @start:
-	;mov cl, cs:[80h]
-	;mov si, 0h
-	;mov di, 82h
-	;@readFileName:
-	;
-	;mov bl, cs:[di]
-	;mov key1[si], bl
-	;
-	;inc si
-	;inc di
-	;dec cx
-	;cmp cx, 1h
-	;jne @readFileName
-	;ret
-
+	mov ax, 0001h
+	call OutInt
+	
 	mov ah, 00h
 	mov al, 4h
 	int 10h
@@ -220,13 +263,8 @@ int33 endp
 	int 21h
 	sti
 	
-	
-	
-
-	
-	
 	;/////////////////////////////////////
-
+    
 	@cycle:
 	
 	
@@ -247,10 +285,10 @@ int33 endp
 	cmp [leftDown], 1h
 	jne @cycle
 	
-	mov bx, [x]
-	call printBX
-	mov bx, [y]
-	call printBX
+	mov ax, [x]
+	call OutInt
+	mov ax, [y]
+	call OutInt
 	
 	mov [leftDown], 0h
 	
@@ -274,7 +312,7 @@ int33 endp
 	int 10h
 	
 	ret
-
+    
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
