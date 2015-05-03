@@ -257,14 +257,58 @@ escCode db 81h
 	call drawSqare
 	
 	@GameSycle:
-	call KeysBufIsEmpty
-	je @GameSycle
+	
+	mov ax, snakePosition
+	mov dl, snakeDirection
+	
+	cmp dl, Left
+	jne @mayBeRight
+	dec ah
+	jmp @Move
+	
+	@mayBeRight:
+	cmp dl, Right
+	jne @mayBeUp
+	inc ah
+	jmp @Move
+	
+	@mayBeUp:
+	cmp dl, Up
+	jne @mayBeDown
+	dec al
+	jmp @Move
+	
+	@mayBeDown:
+	cmp dl, Up
+	inc al
+	
+	
+	
+	@Move:
+	mov snakePosition, ax
+	xor cx, cx
+	xor dx,dx
+	mov dl, al
+	mov cl, ah
+	mov bl, 03h
+	call drawSqare
+	
+	mov bx, currentTime
+	add bx, 03h
+	
+	@wait:
+	
+	
+	@readFromBuf:
+	;call KeysBufIsEmpty
+	;je @GameSycle
+	mov ax, 0
 	call KeysBufErase
 	cmp al, escCode
 	je terminate
 	
-	cmp al, 224
-	je @GameSycle	
+	;cmp al, 224
+	;je @GameSycle	
 	
 	cmp al, Up
 	je @newDirection
@@ -274,11 +318,11 @@ escCode db 81h
 	je @newDirection
 	cmp al, Right
 	je @newDirection
-	jmp @GameSycle
 	
-	
-	@newDirection:
-	mov snakeDirection, al
+
+	mov dx, currentTime
+	cmp bx, dx
+	ja @wait
 	;;cmp al, space
 	;;je stopSound
 	;mov ah, 0h
@@ -302,6 +346,10 @@ escCode db 81h
 	;
 	jmp @GameSycle
 	
+	@newDirection:
+	mov snakeDirection, al
+	
+	jmp @GameSycle
 	
 	terminate:
 

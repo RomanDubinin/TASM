@@ -1,4 +1,4 @@
-keysBuf	dw	5 dup (2)
+keysBuf	dw	8 dup (2)
 keysBufSize dw $ - offset keysBuf
 keysHead dw offset keysBuf
 keysTail dw offset keysBuf
