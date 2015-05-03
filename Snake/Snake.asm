@@ -4,15 +4,8 @@ assume CS:cseg, DS:cseg, SS:cseg
 Org 100h  
 @entry: jmp @start
 
-	keysBuf	dw	5 dup (2)
-	keysBufSize dw $ - offset keysBuf
-	keysHead dw offset keysBuf
-	keysTail dw offset keysBuf
-	
-	snakeBuf	dw	5 dup (2)
-	snakeBufSize dw $ - offset snakeBuf
-	snakeHead dw offset snakeBuf
-	snakeTail dw offset snakeBuf
+	include KeyBuf.inc
+	include SnakeBuf.inc
 	
 	oldInt9 dd ?
 	oldInt1 dd ?
@@ -106,78 +99,6 @@ findIndex proc
 	ret
 findIndex endp
 
-	
-KeysBufIsEmpty proc
-	pusha
-	mov ax, keysHead
-	mov dx, keysTail
-	cmp ax, dx
-	popa
-	ret
-KeysBufIsEmpty endp
-
-KeysBufClosedInc proc ; di
-	push ax
-	push bx
-	add di, 2
-	mov ax, di
-	mov bx, offset keysBuf
-	add bx, keysBufSize
-	cmp ax, bx
-	jne @endInc
-	
-	mov di, offset keysBuf
-	
-	@endInc:
-	
-	pop bx
-	pop ax
-	ret
-KeysBufClosedInc endp
-
-KeysBufInsert proc ; ax - val
-	pusha
-	
-	mov di, cs:[keysHead] ; address 
-	mov cs:[di], ax
-	
-	call KeysBufClosedInc
-	mov keysHead, di
-	call KeysBufIsEmpty
-	je @dataMiss
-	popa 
-	ret
-	
-	@dataMiss:
-	mov ah, 02h
-	mov dx, 'm'
-	int 21h
-	
-	mov di, cs:[keysTail]
-	call KeysBufClosedInc
-	mov keysTail, di
-	
-	popa
-	ret
-KeysBufInsert endp
-	
-KeysBufErase proc
-	push di
-	
-	call KeysBufIsEmpty
-	je @endErase
-	
-	mov di, cs:[keysTail]
-	mov ax, cs:[di]
-	
-	call KeysBufClosedInc
-	mov keysTail, di
-	
-	@endErase:
-	
-	pop di
-	ret
-KeysBufErase endp
 
 int9:
 	; in - read from port
@@ -323,8 +244,17 @@ escCode db 81h
 	call drawSqare
 	
 	call drawContour
+	;/////////////////////////////////////
 	
+	mov ax, snakePosition; start position
+	call SnakeBufInsert
 	
+	mov dx, ax
+	xor dh, dh
+	xor cx, cx
+	mov cl, ah
+	mov bl, 03h
+	call drawSqare
 	
 	@GameSycle:
 	
@@ -381,6 +311,8 @@ escCode db 81h
 	
 	endRow dw 69
 	endColumn dw 127
+	
+	snakePosition dw 0104h
 	
 	currentTime dw 0
 	nextTime dw 0
