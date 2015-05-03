@@ -257,10 +257,28 @@ escCode db 81h
 	call drawSqare
 	
 	@GameSycle:
-	
+	call KeysBufIsEmpty
+	je @GameSycle
 	call KeysBufErase
 	cmp al, escCode
 	je terminate
+	
+	cmp al, 224
+	je @GameSycle	
+	
+	cmp al, Up
+	je @newDirection
+	cmp al, Left
+	je @newDirection
+	cmp al, Down
+	je @newDirection
+	cmp al, Right
+	je @newDirection
+	jmp @GameSycle
+	
+	
+	@newDirection:
+	mov snakeDirection, al
 	;;cmp al, space
 	;;je stopSound
 	;mov ah, 0h
@@ -312,7 +330,13 @@ escCode db 81h
 	endRow dw 69
 	endColumn dw 127
 	
+	Up db 48h
+	Down db 50h
+	Left db 4Bh
+	Right db 4Dh
+	
 	snakePosition dw 0104h
+	snakeDirection db 4Dh
 	
 	currentTime dw 0
 	nextTime dw 0
