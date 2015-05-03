@@ -4,10 +4,16 @@ assume CS:cseg, DS:cseg, SS:cseg
 Org 100h  
 @entry: jmp @start
 
-	buf	dw	5 dup (2)
-	bufSize dw $ - offset buf
-	head dw offset buf
-	tail dw offset buf
+	keysBuf	dw	5 dup (2)
+	keysBufSize dw $ - offset keysBuf
+	keysHead dw offset keysBuf
+	keysTail dw offset keysBuf
+	
+	snakeBuf	dw	5 dup (2)
+	snakeBufSize dw $ - offset snakeBuf
+	snakeHead dw offset snakeBuf
+	snakeTail dw offset snakeBuf
+	
 	oldInt9 dd ?
 	oldInt1 dd ?
 	
@@ -101,43 +107,43 @@ findIndex proc
 findIndex endp
 
 	
-isEmpty proc
+KeysBufIsEmpty proc
 	pusha
-	mov ax, head
-	mov dx, tail
+	mov ax, keysHead
+	mov dx, keysTail
 	cmp ax, dx
 	popa
 	ret
-isEmpty endp
+KeysBufIsEmpty endp
 
-closedInc proc ; di
+KeysBufClosedInc proc ; di
 	push ax
 	push bx
 	add di, 2
 	mov ax, di
-	mov bx, offset buf
-	add bx, bufSize
+	mov bx, offset keysBuf
+	add bx, keysBufSize
 	cmp ax, bx
 	jne @endInc
 	
-	mov di, offset buf
+	mov di, offset keysBuf
 	
 	@endInc:
 	
 	pop bx
 	pop ax
 	ret
-closedInc endp
+KeysBufClosedInc endp
 
-insert proc ; ax - val
+KeysBufInsert proc ; ax - val
 	pusha
 	
-	mov di, cs:[head] ; address 
+	mov di, cs:[keysHead] ; address 
 	mov cs:[di], ax
 	
-	call closedInc
-	mov head, di
-	call isEmpty
+	call KeysBufClosedInc
+	mov keysHead, di
+	call KeysBufIsEmpty
 	je @dataMiss
 	popa 
 	ret
@@ -147,38 +153,38 @@ insert proc ; ax - val
 	mov dx, 'm'
 	int 21h
 	
-	mov di, cs:[tail]
-	call closedInc
-	mov tail, di
+	mov di, cs:[keysTail]
+	call KeysBufClosedInc
+	mov keysTail, di
 	
 	popa
 	ret
-insert endp
+KeysBufInsert endp
 	
-erase proc
+KeysBufErase proc
 	push di
 	
-	call isEmpty
+	call KeysBufIsEmpty
 	je @endErase
 	
-	mov di, cs:[tail]
+	mov di, cs:[keysTail]
 	mov ax, cs:[di]
 	
-	call closedInc
-	mov tail, di
+	call KeysBufClosedInc
+	mov keysTail, di
 	
 	@endErase:
 	
 	pop di
 	ret
-erase endp
+KeysBufErase endp
 
 int9:
 	; in - read from port
 	; out - write into port
 	in al, 60h
 	
-	call Insert
+	call KeysBufInsert
 	
 	in al, 61h
 	or al, 80h ; выставить старший бит 1
@@ -322,7 +328,7 @@ escCode db 81h
 	
 	@GameSycle:
 	
-	call erase
+	call KeysBufErase
 	cmp al, escCode
 	je terminate
 	;;cmp al, space
