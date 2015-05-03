@@ -356,6 +356,19 @@ escCode db 81h
 	jmp @GameSycle
 	
 	@newDirection:
+	mov bl, al
+	sub bl, snakeDirection
+	cmp bl, 2h
+	je @GameSycle
+	cmp bl, 8h
+	je @GameSycle
+	cmp bl, 2h
+	je @GameSycle
+	neg bl
+	cmp bl, 2h
+	je @GameSycle
+	cmp bl, 8h
+	je @GameSycle
 	mov snakeDirection, al
 	
 	jmp @GameSycle
