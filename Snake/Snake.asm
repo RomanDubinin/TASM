@@ -285,12 +285,21 @@ escCode db 81h
 	
 	
 	@Move:
+	call SnakeBufInsert
 	mov snakePosition, ax
 	xor cx, cx
 	xor dx,dx
 	mov dl, al
 	mov cl, ah
-	mov bl, 03h
+	mov bl, 03h; colour
+	call drawSqare
+	
+	call SnakeBufErase
+	xor cx, cx
+	xor dx,dx
+	mov dl, al
+	mov cl, ah
+	mov bl, 00h; colour
 	call drawSqare
 	
 	mov bx, currentTime
