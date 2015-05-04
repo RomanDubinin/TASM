@@ -56,57 +56,79 @@ abort: ret ;return to caller
 randgen endp
 	
 	
-OutInt proc
-	pusha
-	test ax, ax
-	jns oi1
-
-
-	mov  cx, ax
-	mov ah, 02h
-	mov dl, '-'
-	int 21h
-	mov ax, cx
-	neg ax
-; Количество цифр будем держать в CX.
+OutIntVga proc
+        push bp
+        mov bp, sp
+       
+        push ax
+        push bx
+        push cx
+        push dx
+        mov ax, [bp+4]
+        test    ax, ax
+        jns     oi1
+ 
+        
+        neg     ax
 oi1:
-	xor cx, cx
-	mov bx, 10
+        xor     cx, cx
+        mov     bx, 10
 oi2:
-	xor dx,dx
-	div bx
-; Делим число на основание сс. В остатке получается последняя цифра.
-; Сразу выводить её нельзя, поэтому сохраним её в стэке.
-	push dx
-	inc cx
-	mov di, 3h
-	sub di, cx
-; А с частным повторяем то же самое, отделяя от него очередную
-; цифру справа, пока не останется ноль, что значит, что дальше
-; слева только нули.
-	test ax, ax
-	jnz oi2
-	mov ah, 02h
+        xor     dx,dx
+        div     bx
+ 
+        push    dx
+        inc     cx
+ 
+        test    ax, ax
+        jnz     oi2
+ 
 oi3:
-	pop dx
-	add dl, '0'
-	int 21h
-	loop oi3
-	
-	mov bx, di
-	cmp bx, 0h
-	je @exitOut
-outSpase:
-	mov dl, ' '
-	int 21h
-	dec bx
-	cmp bx, 0h
-	jne outSpase
-	
-	@exitOut:
-	popa
-	ret
-OutInt endp
+        pop ax
+ 
+        add al, '0'
+        call put
+ 
+        loop oi3
+ 
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+       
+        pop bp
+        ret 2
+OutIntVga endp
+ 
+put proc
+        pusha
+       
+        mov ah, 0Eh
+        mov bx, 0002h
+        int 10h
+       
+        popa
+        ret
+put endp
+
+clear proc
+		pusha
+		
+		mov ah, 02h
+		mov bh, 0h
+		mov dx, 07h
+		int 10h
+	   
+        mov ah, 09h
+        mov al, ' '
+        mov bx, 0002h
+		mov cx, 8
+        int 10h
+       
+        popa
+        ret
+clear endp
+
 	
 printBX proc
 	pusha
@@ -391,25 +413,9 @@ escCode db 81h
 	sti
 	;/////////////////////////////////
 	
-	mov bl, 03h
-	mov dx, 01h
-	mov cx, 01h
-	call drawSqare
-	
-	mov bl, 02h
-	mov dx, 0
-	mov cx, 0h
-	call drawSqare
-	
-	mov bl, 05h
-	mov dx, 0
-	mov cx, 01h
-	call drawSqare
-	
-	mov bl, 04h
-	mov dx, 01
-	mov cx, 0h
-	call drawSqare
+	mov ah, 09h
+	mov dx, offset scopeString
+	int 21h
 	
 	call drawContour
 	;/////////////////////////////////////
@@ -486,7 +492,10 @@ escCode db 81h
 	jmp @notEaten
 	
 	@eaten:
-	call printBX
+	inc scope
+	push scope
+	call clear
+	call OutIntVga
 	call drawRandomFruit
 	
 	
@@ -629,6 +638,7 @@ escCode db 81h
 	
 	IsPause db 0h
 	gameOverString db "GAME OVER", 0
+	scopeString db 'scope:  $'
 	scope dw 0h
 	
 	snakePosition dw 0104h
