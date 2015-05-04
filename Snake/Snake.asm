@@ -248,6 +248,16 @@ escCode db 81h
 	
 	mov ax, snakePosition; start position
 	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
+	call SnakeBufInsert
 	
 	mov dx, ax
 	xor dh, dh
@@ -257,6 +267,9 @@ escCode db 81h
 	call drawSqare
 	
 	@GameSycle:
+	
+	cmp IsPause, 01h
+	je @doOnPause
 	
 	mov ax, snakePosition
 	mov dl, snakeDirection
@@ -315,6 +328,8 @@ escCode db 81h
 	call KeysBufErase
 	cmp al, escCode
 	je terminate
+	cmp al, space
+	je @doPause
 	
 	;cmp al, 224
 	;je @GameSycle	
@@ -373,6 +388,19 @@ escCode db 81h
 	
 	jmp @GameSycle
 	
+	@doOnPause:
+	mov al, 0
+	call KeysBufErase
+	cmp al, space
+	je @doPause
+	cmp al, escCode
+	je terminate
+	jmp @GameSycle
+	
+	@doPause:
+	xor IsPause, 01h
+	jmp @GameSycle
+	
 	terminate:
 
 	cli
@@ -404,6 +432,8 @@ escCode db 81h
 	Down db 50h
 	Left db 4Bh
 	Right db 4Dh
+	
+	IsPause db 0h
 	
 	snakePosition dw 0104h
 	snakeDirection db 4Dh
