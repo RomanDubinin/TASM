@@ -331,9 +331,8 @@ escCode db 81h
 	xor dx,dx
 	mov dl, al
 	mov cl, ah
-	;check if game over
 	call checkGameOver
-	je terminate
+	je @gameOver
 	mov bl, 03h; colour
 	call drawSqare
 	
@@ -377,27 +376,6 @@ escCode db 81h
 	mov dx, currentTime
 	cmp bx, dx
 	ja @wait
-	;;cmp al, space
-	;;je stopSound
-	;mov ah, 0h
-	;call findIndex
-	;mov di, ax
-	;cmp di, 0
-	;je @GameSycle
-	;mov bx, keys[di]
-	;;call printBX
-	;mov ax, lbs[di]
-	;
-	;call sound
-	;
-	;mov bx, currentTime
-	;add bx, 5h
-	;@wait:
-	;mov ax, currentTime
-	;cmp bx, ax
-	;ja @wait
-	;
-	;
 	jmp @GameSycle
 	
 	@newDirection:
@@ -431,6 +409,36 @@ escCode db 81h
 	xor IsPause, 01h
 	jmp @GameSycle
 	
+	@gameOver:
+	mov ah, 02h
+	mov bh, pageNum
+	mov dh, 0Ah
+	mov dl, 24h
+	int 10h
+	
+	mov di, 0h
+	mov cx, 1h
+	@nextChar:
+	mov ah, 0Ah
+	mov al, gameOverString[di]
+	cmp al, 0h
+	je @waiAnyKey
+	mov bh, pageNum
+	int 10h
+	inc di
+	
+	inc dl
+	mov ah, 02h
+	int 10h
+	jmp @nextChar
+	
+	
+	@waiAnyKey:
+	xor ax, ax
+	call KeysBufErase
+	cmp al, escCode
+	jne @waiAnyKey
+	
 	terminate:
 
 	cli
@@ -451,6 +459,8 @@ escCode db 81h
 	
 	ret
 	
+	pageNum db, 00h
+	
 	startRow dw 3h
 	startColumn dw 0h
 	sqareSize dw 5
@@ -464,6 +474,8 @@ escCode db 81h
 	Right db 4Dh
 	
 	IsPause db 0h
+	gameOverString db "GAME OVER", 0
+	scope dw 0h
 	
 	snakePosition dw 0104h
 	snakeDirection db 4Dh
