@@ -9,6 +9,104 @@ Org 100h
 	
 	oldInt9 dd ?
 	oldInt1 dd ?
+constant dw 8405h ;multiplier value
+seed1 dw ?
+seed2 dw ? ;random number seeds
+	
+randgen proc
+or ax, ax ;range value <> 0?
+jz abort
+push bx
+push cx
+push dx
+push ds
+push ax
+push cs
+pop ds
+mov ax, seed1
+mov bx, seed2 ;load seeds
+mov cx, ax ;save seed
+mul constant
+shl cx, 1
+shl cx, 1
+shl cx, 1
+add ch, cl
+add dx, cx
+add dx, bx
+shl bx, 1 ;begin scramble algorithm
+shl bx, 1
+add dx, bx
+add dh, bl
+mov cl, 5
+shl bx, cl
+add ax, 1
+adc dx, 0
+mov seed1, ax
+mov seed2, dx ;save results as the new seeds
+pop bx ;get back range value
+xor ax, ax
+xchg ax, dx ;adjust ordering
+div bx ;ax = trunc((dx,ax) / bx), dx = (r)
+xchg ax, dx ;return remainder as the random number
+pop ds
+pop dx
+pop cx
+pop bx
+abort: ret ;return to caller
+randgen endp
+	
+	
+OutInt proc
+	pusha
+	test ax, ax
+	jns oi1
+
+
+	mov  cx, ax
+	mov ah, 02h
+	mov dl, '-'
+	int 21h
+	mov ax, cx
+	neg ax
+; Количество цифр будем держать в CX.
+oi1:
+	xor cx, cx
+	mov bx, 10
+oi2:
+	xor dx,dx
+	div bx
+; Делим число на основание сс. В остатке получается последняя цифра.
+; Сразу выводить её нельзя, поэтому сохраним её в стэке.
+	push dx
+	inc cx
+	mov di, 3h
+	sub di, cx
+; А с частным повторяем то же самое, отделяя от него очередную
+; цифру справа, пока не останется ноль, что значит, что дальше
+; слева только нули.
+	test ax, ax
+	jnz oi2
+	mov ah, 02h
+oi3:
+	pop dx
+	add dl, '0'
+	int 21h
+	loop oi3
+	
+	mov bx, di
+	cmp bx, 0h
+	je @exitOut
+outSpase:
+	mov dl, ' '
+	int 21h
+	dec bx
+	cmp bx, 0h
+	jne outSpase
+	
+	@exitOut:
+	popa
+	ret
+OutInt endp
 	
 printBX proc
 	pusha
@@ -126,6 +224,27 @@ checkGameOver proc ;dx - row; cx - column - checking block
 	ret
 checkGameOver endp
 
+isFruitEaten proc ;dx - row; cx - column - checking block
+	pusha
+	mov ax, dx
+	mul sqareSize
+	mov dx, ax
+	push dx
+	
+	mov ax, cx
+	mul sqareSize
+	mov cx, ax
+	pop dx
+	
+	mov bh, 0
+	mov ah, 0Dh
+	int 10h
+	
+	cmp al, fruitColour
+	popa
+	ret
+isFruitEaten endp
+
 int9:
 	; in - read from port
 	; out - write into port
@@ -212,6 +331,29 @@ drawContour proc
 	ret
 drawContour endp
 	
+drawRandomFruit proc
+	pusha
+	mov ax, 68
+	call randgen
+	mov dx, ax
+	
+	mov ax, 126
+	call randgen
+	mov cx, ax
+	
+	add dx, startRow
+	inc dx
+
+	add cx, startColumn
+	inc cx
+
+	
+	mov bl, fruitColour
+	call drawSqare
+	popa
+	ret
+drawRandomFruit endp
+	
 ; скан-коды клавиш
 space db 039h
 escCode db 81h
@@ -276,14 +418,6 @@ escCode db 81h
 	call SnakeBufInsert
 	call SnakeBufInsert
 	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
-	call SnakeBufInsert
 	
 	mov dx, ax
 	xor dh, dh
@@ -291,6 +425,8 @@ escCode db 81h
 	mov cl, ah
 	mov bl, blueColour
 	call drawSqare
+	
+	call drawRandomFruit
 	
 	@GameSycle:
 	
@@ -333,19 +469,37 @@ escCode db 81h
 	mov cl, ah
 	call checkGameOver
 	je @gameOver
-	mov bl, 03h; colour
-	call drawSqare
+	
+	push cx
+	push dx
+	call isFruitEaten
+	je @eaten
 	
 	call SnakeBufErase
+	
 	xor cx, cx
 	xor dx,dx
 	mov dl, al
 	mov cl, ah
 	mov bl, 00h; colour
 	call drawSqare
+	jmp @notEaten
+	
+	@eaten:
+	call printBX
+	call drawRandomFruit
+	
+	
+	@notEaten:
+	pop dx
+	pop cx
+	mov bl, blueColour; colour
+	call drawSqare
 	
 	mov bx, currentTime
 	add bx, speedCoef
+	
+	
 	
 	@wait:
 	
@@ -487,6 +641,7 @@ escCode db 81h
 	
 	redColour db 04h
 	blueColour db 03h
+	fruitColour db 05h
 	
 	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
 	masLen dw $ - keys - 1
