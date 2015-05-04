@@ -104,7 +104,8 @@ put proc
         pusha
        
         mov ah, 0Eh
-        mov bx, 0002h
+        mov bh, 0h
+		mov bl, fruitColour
         int 10h
        
         popa
