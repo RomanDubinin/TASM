@@ -99,6 +99,32 @@ findIndex proc
 	ret
 findIndex endp
 
+checkGameOver proc ;dx - row; cx - column - checking block
+	pusha
+	
+	mov ax, dx
+	mul sqareSize
+	mov dx, ax
+	push dx
+	
+	mov ax, cx
+	mul sqareSize
+	mov cx, ax
+	pop dx
+	
+	mov bh, 0
+	mov ah, 0Dh
+	int 10h
+	
+	cmp al, blueColour
+	je @endCheck
+	cmp al, redColour
+	je @endCheck
+
+	@endCheck:
+	popa
+	ret
+checkGameOver endp
 
 int9:
 	; in - read from port
@@ -158,7 +184,7 @@ drawSqare endp
 	
 drawContour proc 
 	pusha
-	mov bl, 04h
+	mov bl, redColour
 	
 	mov dx, startRow
 	mov cx, startColumn
@@ -263,7 +289,7 @@ escCode db 81h
 	xor dh, dh
 	xor cx, cx
 	mov cl, ah
-	mov bl, 03h
+	mov bl, blueColour
 	call drawSqare
 	
 	@GameSycle:
@@ -298,12 +324,16 @@ escCode db 81h
 	
 	
 	@Move:
+	
 	call SnakeBufInsert
 	mov snakePosition, ax
 	xor cx, cx
 	xor dx,dx
 	mov dl, al
 	mov cl, ah
+	;check if game over
+	call checkGameOver
+	je terminate
 	mov bl, 03h; colour
 	call drawSqare
 	
@@ -316,7 +346,7 @@ escCode db 81h
 	call drawSqare
 	
 	mov bx, currentTime
-	add bx, 03h
+	add bx, speedCoef
 	
 	@wait:
 	
@@ -440,6 +470,11 @@ escCode db 81h
 	
 	currentTime dw 0
 	nextTime dw 0
+	
+	speedCoef dw 01h
+	
+	redColour db 04h
+	blueColour db 03h
 	
 	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
 	masLen dw $ - keys - 1
