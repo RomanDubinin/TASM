@@ -302,7 +302,6 @@ Resize proc
 	cmp dx, 0
 	jne @NotXdec
 	dec endColumn
-	call printBX
 	@NotXdec:
 	
 	xor dx, dx
@@ -312,7 +311,6 @@ Resize proc
 	cmp dx, 0
 	jne @NotYdec
 	dec endRow
-	call printBX
 	@NotYdec:
 	popa
 	ret
@@ -573,7 +571,7 @@ escCode db 81h
 	
 	startRow dw 3h
 	startColumn dw 0h
-	sqareSize dw 17
+	sqareSize dw 7
 	
 	
 	sizeX dw 640
