@@ -14,171 +14,122 @@ seed1 dw ?
 seed2 dw ? ;random number seeds
 	
 randgen proc
-or ax, ax ;range value <> 0?
-jz abort
-push bx
-push cx
-push dx
-push ds
-push ax
-push cs
-pop ds
-mov ax, seed1
-mov bx, seed2 ;load seeds
-mov cx, ax ;save seed
-mul constant
-shl cx, 1
-shl cx, 1
-shl cx, 1
-add ch, cl
-add dx, cx
-add dx, bx
-shl bx, 1 ;begin scramble algorithm
-shl bx, 1
-add dx, bx
-add dh, bl
-mov cl, 5
-shl bx, cl
-add ax, 1
-adc dx, 0
-mov seed1, ax
-mov seed2, dx ;save results as the new seeds
-pop bx ;get back range value
-xor ax, ax
-xchg ax, dx ;adjust ordering
-div bx ;ax = trunc((dx,ax) / bx), dx = (r)
-xchg ax, dx ;return remainder as the random number
-pop ds
-pop dx
-pop cx
-pop bx
-abort: ret ;return to caller
+	or ax, ax ;range value <> 0?
+	jz abort
+	push bx
+	push cx
+	push dx
+	push ds
+	push ax
+	push cs
+	pop ds
+	mov ax, seed1
+	mov bx, seed2 ;load seeds
+	mov cx, ax ;save seed
+	mul constant
+	shl cx, 1
+	shl cx, 1
+	shl cx, 1
+	add ch, cl
+	add dx, cx
+	add dx, bx
+	shl bx, 1 ;begin scramble algorithm
+	shl bx, 1
+	add dx, bx
+	add dh, bl
+	mov cl, 5
+	shl bx, cl
+	add ax, 1
+	adc dx, 0
+	mov seed1, ax
+	mov seed2, dx ;save results as the new seeds
+	pop bx ;get back range value
+	xor ax, ax
+	xchg ax, dx ;adjust ordering
+	div bx ;ax = trunc((dx,ax) / bx), dx = (r)
+	xchg ax, dx ;return remainder as the random number
+	pop ds
+	pop dx
+	pop cx
+	pop bx
+	abort: 
+	ret ;return to caller
 randgen endp
 	
 	
 OutIntVga proc
-        push bp
-        mov bp, sp
-       
-        push ax
-        push bx
-        push cx
-        push dx
-        mov ax, [bp+4]
-        test    ax, ax
-        jns     oi1
- 
-        
-        neg     ax
+	push bp
+	mov bp, sp
+	
+	push ax
+	push bx
+	push cx
+	push dx
+	mov ax, [bp+4]
+	test    ax, ax
+	jns     oi1
+	
+	
+	neg ax
 oi1:
-        xor     cx, cx
-        mov     bx, 10
+	xor cx, cx
+	mov bx, 10
 oi2:
-        xor     dx,dx
-        div     bx
- 
-        push    dx
-        inc     cx
- 
-        test    ax, ax
-        jnz     oi2
- 
+	xor dx,dx
+	div bx
+	
+	push dx
+	inc cx
+	
+	test ax, ax
+	jnz oi2
+	
 oi3:
-        pop ax
- 
-        add al, '0'
-        call put
- 
-        loop oi3
- 
-        pop dx
-        pop cx
-        pop bx
-        pop ax
-       
-        pop bp
-        ret 2
+	pop ax
+	
+	add al, '0'
+	call put
+	
+	loop oi3
+	
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+	
+	pop bp
+	ret 2
 OutIntVga endp
  
 put proc
-        pusha
-       
-        mov ah, 0Eh
-        mov bh, 0h
-		mov bl, fruitColour
-        int 10h
-       
-        popa
-        ret
+	pusha
+	
+	mov ah, 0Eh
+	mov bh, 0h
+	mov bl, fruitColour
+	int 10h
+	
+	popa
+	ret
 put endp
 
 clear proc
-		pusha
-		
-		mov ah, 02h
-		mov bh, 0h
-		mov dx, 07h
-		int 10h
-	   
-        mov ah, 09h
-        mov al, ' '
-        mov bx, 0002h
-		mov cx, 8
-        int 10h
-       
-        popa
-        ret
-clear endp
-
+	pusha
 	
-printBX proc
-	pusha
-	mov cx, 4
-	@k:
-	rol bx, 4 ; bx = 0001000000010000
-	mov al, bl ; al = 00010000
-	and al, 0fh ; al = 00000000
-	cmp al, 10
-	sbb al, 69h
-	das
-	mov dh, 02h
-	xchg ax, dx
-	int 21h
-	loop @k
+	mov ah, 02h
+	mov bh, 0h
+	mov dx, 07h
+	int 10h
+	
+	mov ah, 09h
+	mov al, ' '
+	mov bx, 0002h
+	mov cx, 8
+	int 10h
+	
 	popa
 	ret
-printBX endp
-
-sound proc
-    pusha
-    mov bx, ax
-	mov ax, 34ddh
-	mov dx, 12h
-	div bx
-	mov bx, ax 
-	in al, 61h
-	or al, 3
-	out 61h, al
-	mov al, 10000110b
-	mov dx, 43h
-	out dx, al
-	dec dx
-	mov al, bl
-	out dx, al
-	mov al, bh
-	out dx, al
-    popa
-    ret
-sound endp
-
-no_sound proc
-	pusha
-	in		al, 61h
-	and		al, not 3
-	out 	61h, al
-	popa
-	ret
-no_sound endp
+clear endp
 
 int1c proc
 	push ds
@@ -190,36 +141,6 @@ int1c proc
 	db 0eah
 	l1c dw 0, 0
 int1c endp
-
-findIndex proc
-	push cx
-	push di
-	push bx
-	
-	mov cx, masLen
-	shl cx, 1
-	lea di, keys
-	
-	@loop:
-	dec cx
-	dec cx
-	mov di, cx
-	mov bx, keys[di]
-	cmp ax, bx
-	je @loopEnd
-	cmp cx, 0
-	jne @loop
-	
-	@loopEnd:
-	mov ax, cx
-	
-	pop bx
-	pop di
-	pop cx
-	
-	ret
-findIndex endp
-
 
 checkColour proc ;dx - row; cx - column - checking block; bl - colour
 	pusha
@@ -332,11 +253,11 @@ drawContour endp
 drawRandomFruit proc
 	pusha
 	@againRandom:
-	mov ax, 68
+	mov ax, endRow
 	call randgen
 	mov dx, ax
 	
-	mov ax, 126
+	mov ax, endColumn
 	call randgen
 	mov cx, ax
 	
@@ -498,8 +419,6 @@ escCode db 81h
 	
 	
 	@readFromBuf:
-	;call KeysBufIsEmpty
-	;je @GameSycle
 	mov ax, 0
 	call KeysBufErase
 	cmp al, escCode
@@ -614,6 +533,8 @@ escCode db 81h
 	
 	endRow dw 69
 	endColumn dw 127
+	;endRow dw 34
+	;endColumn dw 63
 	
 	Up db 48h
 	Down db 50h
@@ -636,10 +557,6 @@ escCode db 81h
 	redColour db 04h
 	blueColour db 03h
 	fruitColour db 05h
-	
-	keys dw 01,  02, 03, 04, 05, 06, 07, 08,	 10h, 11h, 12h, 13h, 14h, 15h, 16h, 	1Eh, 1Fh, 20h, 21h, 22h, 23h, 24h
-	masLen dw $ - keys - 1
-	lbs dw 0h, 261, 293, 329, 349, 392, 440, 493,	 523, 587, 659, 698, 784, 880, 987, 	1046, 1174, 1318, 1396, 1568, 1720, 1975
 	
 end @entry 
 cseg ends
