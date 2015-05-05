@@ -220,7 +220,8 @@ findIndex proc
 	ret
 findIndex endp
 
-checkGameOver proc ;dx - row; cx - column - checking block
+
+checkColour proc ;dx - row; cx - column - checking block; bl - colour
 	pusha
 	
 	mov ax, dx
@@ -237,36 +238,10 @@ checkGameOver proc ;dx - row; cx - column - checking block
 	mov ah, 0Dh
 	int 10h
 	
-	cmp al, blueColour
-	je @endCheck
-	cmp al, redColour
-	je @endCheck
-
-	@endCheck:
+	cmp al, bl
 	popa
 	ret
-checkGameOver endp
-
-isFruitEaten proc ;dx - row; cx - column - checking block
-	pusha
-	mov ax, dx
-	mul sqareSize
-	mov dx, ax
-	push dx
-	
-	mov ax, cx
-	mul sqareSize
-	mov cx, ax
-	pop dx
-	
-	mov bh, 0
-	mov ah, 0Dh
-	int 10h
-	
-	cmp al, fruitColour
-	popa
-	ret
-isFruitEaten endp
+checkColour endp
 
 int9:
 	; in - read from port
@@ -356,6 +331,7 @@ drawContour endp
 	
 drawRandomFruit proc
 	pusha
+	@againRandom:
 	mov ax, 68
 	call randgen
 	mov dx, ax
@@ -370,7 +346,9 @@ drawRandomFruit proc
 	add cx, startColumn
 	inc cx
 
-	
+	mov bl, blueColour
+	call checkColour
+	je @againRandom
 	mov bl, fruitColour
 	call drawSqare
 	popa
@@ -424,7 +402,6 @@ escCode db 81h
 	mov ax, snakePosition; start position
 	call SnakeBufInsert
 	call SnakeBufInsert
-	call SnakeBufInsert
 	
 	mov dx, ax
 	xor dh, dh
@@ -474,12 +451,18 @@ escCode db 81h
 	xor dx,dx
 	mov dl, al
 	mov cl, ah
-	call checkGameOver
+	mov bl, blueColour
+	call checkColour
+	je @gameOver
+	
+	mov bl, redColour
+	call checkColour
 	je @gameOver
 	
 	push cx
 	push dx
-	call isFruitEaten
+	mov bl, fruitColour
+	call checkColour
 	je @eaten
 	
 	call SnakeBufErase
@@ -639,7 +622,7 @@ escCode db 81h
 	
 	IsPause db 0h
 	gameOverString db "GAME OVER", 0
-	scopeString db 'scope:  $'
+	scopeString db 'score:  $'
 	scope dw 0h
 	
 	snakePosition dw 0104h
