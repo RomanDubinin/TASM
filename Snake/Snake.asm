@@ -56,6 +56,23 @@ randgen proc
 	ret ;return to caller
 randgen endp
 	
+printBX proc
+	pusha
+	mov cx, 4
+	@k:
+	rol bx, 4 ; bx = 0001000000010000
+	mov al, bl ; al = 00010000
+	and al, 0fh ; al = 00000000
+	cmp al, 10
+	sbb al, 69h
+	das
+	mov dh, 02h
+	xchg ax, dx
+	int 21h
+	loop @k
+	popa
+	ret
+printBX endp
 	
 OutIntVga proc
 	push bp
@@ -276,6 +293,31 @@ drawRandomFruit proc
 	ret
 drawRandomFruit endp
 	
+Resize proc 
+	pusha
+	xor dx, dx
+	mov ax, sizeX
+	div sqareSize
+	mov endColumn, ax
+	cmp dx, 0
+	jne @NotXdec
+	dec endColumn
+	call printBX
+	@NotXdec:
+	
+	xor dx, dx
+	mov ax, sizeY
+	div sqareSize
+	mov endRow, ax
+	cmp dx, 0
+	jne @NotYdec
+	dec endRow
+	call printBX
+	@NotYdec:
+	popa
+	ret
+Resize endp
+	
 ; скан-коды клавиш
 space db 039h
 escCode db 81h
@@ -312,6 +354,8 @@ escCode db 81h
 	int 21h
 	sti
 	;/////////////////////////////////
+	
+	call Resize
 	
 	mov ah, 09h
 	mov dx, offset scopeString
@@ -529,12 +573,14 @@ escCode db 81h
 	
 	startRow dw 3h
 	startColumn dw 0h
-	sqareSize dw 5
+	sqareSize dw 17
 	
-	endRow dw 69
-	endColumn dw 127
-	;endRow dw 34
-	;endColumn dw 63
+	
+	sizeX dw 640
+	sizeY dw 350
+	
+	endRow dw ?
+	endColumn dw ?
 	
 	Up db 48h
 	Down db 50h
