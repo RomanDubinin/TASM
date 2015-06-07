@@ -1,7 +1,7 @@
 @echo off
 tasm /zi  /l /c /m2 %1.asm
 if errorlevel 1 goto ert
-tlink /v /m /i /l /s /n %1.obj
+tlink /v /m /i /l /t /s /n %1.obj
 if errorlevel 1 goto erl
 echo *********** 1 *************
 goto end
